@@ -2,31 +2,28 @@ import shlex
 
 from rich import print
 
-from utils.user_auth import login, create_user
+from utils.user_auth import auth_command, is_authenticated
+from arg_parsers.parent_parser import parent_parser
 
 
-def dispatch(command):
-    tokens = shlex.split(command)
+def dispatch(raw_string):
+    tokens = shlex.split(raw_string)
 
     if not tokens:
         return
-    cmd = tokens[0]
-    args = tokens[1:]
 
-    if cmd == "auth":
-        if login(args):
-            print("[green] user authenticated [/green]")
-        else:
-            print("[red] invalid [/red]")
-            return False
+    parser = parent_parser.parse_args(tokens)
 
-    elif cmd == "create-user":
-        if create_user(args):
-            print(
-                "[green] user created successfully [/green] try [bold magenta] auth [/bold magenta]"
-            )
-        else:
-            print("[red] user already exist[/red]")
-            return False
+    if parser.command != "auth":
+        if not is_authenticated():
+            print("[red] user should be authenticated first [/red]")
+            return
+
+    if parser.command == "auth":
+
+        auth_command(parser)
+
+    # elif parser.command == "password":
+    #     print(parser.echo)
 
     return True
