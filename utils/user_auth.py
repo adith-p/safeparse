@@ -37,6 +37,18 @@ def create_user(parser):
     return True
 
 
+def is_authenticated() -> bool:
+    return user_authenticated
+
+
+def hash_password():
+    pass
+
+
+def verfy_password():
+    pass
+
+
 def auth_command(parser):
 
     if parser.auth_command == "user":
@@ -58,7 +70,3 @@ def auth_command(parser):
 
     # elif sub_cmd == "--help":
     #     print(parent_parser.add_help())
-
-
-def is_authenticated() -> bool:
-    return user_authenticated

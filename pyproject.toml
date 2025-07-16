@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "apsw>=3.50.2.0",
     "passlib[bcrypt]>=1.7.4",
     "prompt-toolkit>=3.0.51",
     "rich>=14.0.0",
