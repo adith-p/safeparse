@@ -44,7 +44,11 @@ def authenticate(username, password) -> bool:
     global user_authenticated
 
     user_data = Database_controller().get_user(username)
-    # try:
+
+    if user_data is None:
+        print("user does not exist")
+        return False
+
     if user_data[1] == username:
 
         hashed_password, password_salt = hash_password(password)
@@ -103,7 +107,7 @@ def auth_command(parser):
 
     if parser.auth_command == "user":
 
-        if login(parser):
+        if login():
             print("[green] user authenticated [/green]")
         else:
             return False
