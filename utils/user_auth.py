@@ -1,7 +1,12 @@
 from arg_parsers.login_parser import parent_parser, auth_subparser
 from rich import print
 
+
 from prompt_toolkit import PromptSession
+import bcrypt
+from getpass import getpass
+
+from .db import Database_controller
 
 
 db = {"admin": "123"}
@@ -9,44 +14,65 @@ db = {"admin": "123"}
 user_authenticated = None
 
 
+def hash_password(password: bytes):
+    password_salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode(), password_salt), password_salt
+
+
+def verfy_password(psw, hashed_psw):
+    return bcrypt.checkpw(psw.encode(), hashed_psw)
+
+
 def login(parser):
+    session = PromptSession()
+    username = session.prompt("Username > ")
+    password = getpass("password > ")
 
     # parser = parent_parser.parse_args(arg)
-    return authenticate(username=parser.username, password=parser.password)
+    # return authenticate(username=parser.username, password=parser.password)
+    return authenticate(username=username, password=password)
 
 
 def authenticate(username, password) -> bool:
     global user_authenticated
-    if username in db.keys():
-        if password == db[username]:
+
+    user_data = Database_controller().get_user(username)
+    # try:
+    if user_data[1] == username:
+
+        hashed_password, password_salt = hash_password(password)
+        if verfy_password(password, hashed_password):
             user_authenticated = True
+
             return True
-        return False
+        print("[red] password or username is incorrect [/red]")
+    # except Exception:
+    #     print(
+    #         "[red] user does not exist [/red] try - [purple] auth create-user [/purple]"
+    #     )
+    return False
 
 
 def create_user(parser):
 
     # parser = parent_parser.parse_args(arg)
 
-    if parser.username in db.keys():
-        print("[red] username already exist [/red]")
-        return False
+    # if parser.username in db.keys():
+    #     print("[red] username already exist [/red]")
+    #     return False
+
     session = PromptSession()
-    password = session.prompt(" Password > ")
-    db[parser.username] = password
+    password = getpass("password > ")
+
+    password_hash, password_salt = hash_password(password)
+    curr = Database_controller().create_user(
+        parser.username, password_hash, password_salt
+    )
     return True
 
 
 def is_authenticated() -> bool:
     return user_authenticated
-
-
-def hash_password():
-    pass
-
-
-def verfy_password():
-    pass
 
 
 def auth_command(parser):
@@ -56,7 +82,6 @@ def auth_command(parser):
         if login(parser):
             print("[green] user authenticated [/green]")
         else:
-            print("[red] invalid [/red]")
             return False
 
     elif parser.auth_command == "create-user":
@@ -65,7 +90,7 @@ def auth_command(parser):
                 "[green] user created successfully [/green] try [bold magenta] auth [/bold magenta]"
             )
         else:
-            print("[red] user already exist[/red]")
+            print("[red] user already exist[/red] try - [purple] auth user [/purple]")
             return False
 
     # elif sub_cmd == "--help":

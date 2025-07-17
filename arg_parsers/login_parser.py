@@ -21,8 +21,8 @@ auth_subparser = auth_parser.add_subparsers(dest="auth_command", required=True)
 
 # user login parser
 user_auth_parser = auth_subparser.add_parser(name="user", help="Login a user")
-user_auth_parser.add_argument("--username", required=True)
-user_auth_parser.add_argument("--password", required=True)
+# user_auth_parser.add_argument("--username", required=True)
+# user_auth_parser.add_argument("--password", required=True)
 
 
 # create user parser
