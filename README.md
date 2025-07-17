@@ -20,6 +20,12 @@ This project uses [pyproject.toml](https://peps.python.org/pep-0518/) for depend
 [uv](https://github.com/astral-sh/uv) is a fast Python package manager. To install dependencies:
 
 ```bash
+uv venv
+uv pip sync pyproject.toml
+```
+or
+
+```bash
 uv add -r requirements.txt
 ```
 
