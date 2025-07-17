@@ -20,7 +20,7 @@ This project uses [pyproject.toml](https://peps.python.org/pep-0518/) for depend
 [uv](https://github.com/astral-sh/uv) is a fast Python package manager. To install dependencies:
 
 ```bash
-uv pip install --system
+uv add -r requirements.txt
 ```
 
 If you don't have `uv` installed, you can install it via pip:
@@ -33,11 +33,6 @@ pip install uv
 
 You can also install dependencies with pip:
 
-```bash
-pip install .
-```
-
-Or, to only install dependencies without the package itself:
 
 ```bash
 pip install -r requirements.txt
