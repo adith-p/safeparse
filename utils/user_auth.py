@@ -23,11 +23,18 @@ def verfy_password(psw, hashed_psw):
     return bcrypt.checkpw(psw.encode(), hashed_psw)
 
 
-def login(parser):
+def login():
     session = PromptSession()
-    username = session.prompt("Username > ")
-    password = getpass("password > ")
 
+    username = session.prompt("Username > ").strip()
+    if not username:
+        print(" Username cannot be empty.")
+        return
+
+    password = getpass("Password > ").strip()
+    if not password:
+        print("Password cannot be empty.")
+        return
     # parser = parent_parser.parse_args(arg)
     # return authenticate(username=parser.username, password=parser.password)
     return authenticate(username=username, password=password)
@@ -61,13 +68,30 @@ def create_user(parser):
     #     print("[red] username already exist [/red]")
     #     return False
 
+    db = Database_controller()
     session = PromptSession()
-    password = getpass("password > ")
+
+    # Check if user already exists
+    username = session.prompt("Username > ").strip()
+    if username:
+        if db.get_user(username).fetchone():
+            print("['red']Username already exists.['/red']")
+            return False
+    else:
+        print("[red] username can't be empty [/red]")
+        return False
+
+    password = getpass("Password > ").strip()
+    if not password:
+        print("['red']Password cannot be empty.['/red']")
+        return False
 
     password_hash, password_salt = hash_password(password)
+
     curr = Database_controller().create_user(
         parser.username, password_hash, password_salt
     )
+
     return True
 
 

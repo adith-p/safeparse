@@ -31,7 +31,7 @@ create_user_parser = auth_subparser.add_parser(
     name="create-user", help="Create a new user"
 )
 
-create_user_parser.add_argument("--username", required=True)
+# create_user_parser.add_argument("--username", required=True)
 
 
 # password_parser = subparsers.add_parser("password", help="Password-related commands")
