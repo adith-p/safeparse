@@ -1,8 +1,7 @@
-"apsw>=3.50.2.0",    
-"bcrypt>=4.3.0",
-"cryptography>=45.0.5",   
-"passlib[bcrypt]>=1.7.4",
-"prompt-toolkit>=3.0.51",
-"rich>=14.0.0",
-"textual>=3.7.1",
-
+apsw>=3.50.2.0
+bcrypt>=4.3.0
+cryptography>=45.0.5
+passlib[bcrypt]>=1.7.4
+prompt-toolkit>=3.0.51
+rich>=14.0.0
+textual>=3.7.1
