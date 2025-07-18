@@ -78,7 +78,7 @@ def create_user(parser):
     # Check if user already exists
     username = session.prompt("Username > ").strip()
     if username:
-        if db.get_user(username).fetchone():
+        if db.get_user(username):
             print("['red']Username already exists.['/red']")
             return False
     else:
@@ -93,7 +93,7 @@ def create_user(parser):
     password_hash, password_salt = hash_password(password)
 
     curr = Database_controller().create_user(
-        parser.username, password_hash, password_salt
+        username, password_hash, password_salt
     )
 
     return True
