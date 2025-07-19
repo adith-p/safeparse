@@ -36,3 +36,5 @@ create_user_parser = auth_subparser.add_parser(
 
 # password_parser = subparsers.add_parser("password", help="Password-related commands")
 # password_subparser = password_parser.add_argument("--echo")
+
+menu_parser = subparsers.add_parser("menu", help="menu for feature access")

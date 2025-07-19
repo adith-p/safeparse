@@ -52,3 +52,29 @@ class Database_controller:
         finally:
             if conn:
                 conn.close()
+
+    def get_passhash(self, username: str):
+        sql_query = "SELECT master_password_hash FROM users WHERE username = (?);"
+        conn = self.get_connection()
+        curr = conn.cursor()
+        try:
+            result = curr.execute(sql_query, (username,))
+            return result.fetchone()
+        except Exception as e:
+            raise e
+        finally:
+            if conn:
+                conn.close()
+
+    def get_salt(self, username: str):
+        sql_query = "SELECT master_password_salt FROM users WHERE username = (?);"
+        conn = self.get_connection()
+        curr = conn.cursor()
+        try:
+            result = curr.execute(sql_query, (username,))
+            return result.fetchone()
+        except Exception as e:
+            raise e
+        finally:
+            if conn:
+                conn.close()

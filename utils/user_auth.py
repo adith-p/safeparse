@@ -1,4 +1,4 @@
-from arg_parsers.login_parser import parent_parser, auth_subparser
+from arg_parsers.subparsers import parent_parser, auth_subparser
 from rich import print
 
 
@@ -14,7 +14,19 @@ db = {"admin": "123"}
 user_authenticated = None
 
 
-def hash_password(password: bytes):
+# def get_salt(username):
+#     salt = Database_controller().get_salt(username)
+#     if salt is None:
+#         print("salt not found")
+#         return False
+#     return salt
+
+
+def password_hash(password, salt):
+    return bcrypt.hashpw(password.encode(), salt)
+
+
+def hash_password(password):
     password_salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode(), password_salt), password_salt
 
@@ -51,7 +63,7 @@ def authenticate(username, password) -> bool:
 
     if user_data[1] == username:
 
-        hashed_password, password_salt = hash_password(password)
+        hashed_password = password_hash(password=password, salt=user_data[3])
         if verfy_password(password, hashed_password):
             user_authenticated = True
 
@@ -65,12 +77,6 @@ def authenticate(username, password) -> bool:
 
 
 def create_user(parser):
-
-    # parser = parent_parser.parse_args(arg)
-
-    # if parser.username in db.keys():
-    #     print("[red] username already exist [/red]")
-    #     return False
 
     db = Database_controller()
     session = PromptSession()
@@ -92,9 +98,7 @@ def create_user(parser):
 
     password_hash, password_salt = hash_password(password)
 
-    curr = Database_controller().create_user(
-        username, password_hash, password_salt
-    )
+    curr = Database_controller().create_user(username, password_hash, password_salt)
 
     return True
 
