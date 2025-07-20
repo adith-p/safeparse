@@ -7,7 +7,8 @@ from utils.user_auth import auth_command, is_authenticated
 from arg_parsers.parent_parser import parent_parser
 
 from utils.passgen import gen_password
-from utils.user import user_command
+
+# from utils.user_auth import user_command
 
 from beaupy._internals import ValidationError
 
@@ -28,9 +29,9 @@ def dispatch(raw_string):
     if parser.command == "auth":
         auth_command(parser)
 
-    if parser.command == "user":
-        # NOTE:- once the password vault have been set up work on this
-        user_command(parser)
+    # if parser.command == "user":
+    #     # NOTE:- once the password vault have been set up work on this
+    #     user_command(parser)
 
     elif parser.command == "menu":
         opt = show_main_menu()
