@@ -25,8 +25,14 @@ user_auth_parser = auth_subparser.add_parser(name="user", help="Login a user")
 # user_auth_parser.add_argument("--password", required=True)
 
 
-# create user parser
+# user parser - subparsers of parent parser
+user_parser = subparsers.add_parser("user", help="user-related commands")
+user_subparser = user_parser.add_subparsers(dest="user_command", required=True)
+user_delete_parser = user_subparser.add_parser(
+    name="delete", help="remove current user and all related things "
+)
 
+# create user parser
 create_user_parser = auth_subparser.add_parser(
     name="create-user", help="Create a new user"
 )

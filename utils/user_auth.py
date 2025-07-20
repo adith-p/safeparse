@@ -5,14 +5,19 @@ from rich import print
 from prompt_toolkit import PromptSession
 import bcrypt
 from getpass import getpass
+from uuid import uuid4
 
-from .db import Database_controller
+from .db import User_db_controller
+from models.User_model import User_model
 
 
-db = {"admin": "123"}
+# user_authenticated = None
 
-user_authenticated = None
-
+# user_request = {
+#     "user_authenticated": None,
+#     "user_id": None,
+#     "username": None,
+# }
 
 # def get_salt(username):
 #     salt = Database_controller().get_salt(username)
@@ -55,7 +60,7 @@ def login():
 def authenticate(username, password) -> bool:
     global user_authenticated
 
-    user_data = Database_controller().get_user(username)
+    user_data = User_db_controller().get_user(username)
 
     if user_data is None:
         print("user does not exist")
@@ -65,7 +70,9 @@ def authenticate(username, password) -> bool:
 
         hashed_password = password_hash(password=password, salt=user_data[3])
         if verfy_password(password, hashed_password):
-            user_authenticated = True
+            user_request["user_authenticated"] = True
+            user_request["username"] = username
+            user_request["user_id"] = user_data[0]
 
             return True
         print("[red] password or username is incorrect [/red]")
@@ -78,7 +85,7 @@ def authenticate(username, password) -> bool:
 
 def create_user(parser):
 
-    db = Database_controller()
+    db = User_db_controller()
     session = PromptSession()
 
     # Check if user already exists
@@ -97,14 +104,20 @@ def create_user(parser):
         return False
 
     password_hash, password_salt = hash_password(password)
-
-    curr = Database_controller().create_user(username, password_hash, password_salt)
+    user_id = str(uuid4())
+    curr = User_db_controller().create_user(
+        user_id, username, password_hash, password_salt
+    )
 
     return True
 
 
-def is_authenticated() -> bool:
-    return user_authenticated
+# def is_authenticated() -> bool:
+#     return user_request["user_authenticated"]
+
+
+# def get_current_user() -> str:
+#     return user_request["username"]
 
 
 def auth_command(parser):

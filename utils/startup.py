@@ -87,19 +87,49 @@ def init_db():
             # print(f"Checking if database schema exists in {DB_FILE}...")
             if not schema_exist:
                 # print("Schema does not exist. Creating 'users' table...")
-                progress_counter.label = "Creating user table..."
+                progress_counter.label = "Creating user tables..."
                 for i in range(20):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
 
                 curr.execute(
                     """
-                    CREATE TABLE users (
-                        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    CREATE TABLE IF NOT EXISTS users (
+                        user_id TEXT PRIMARY KEY,
                         username TEXT NOT NULL UNIQUE,
                         master_password_hash TEXT NOT NULL,
                         master_password_salt TEXT NOT NULL
                     );
+                    """
+                )
+                conn.commit()
+                for i in range(10):
+                    time.sleep(0.0100)
+                    progress_counter.item_completed()
+                curr.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS user_passwords (
+                    password_id TEXT PRIMARY KEY,
+                    login_username TEXT,
+                    notes TEXT,               
+                    user_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+                    );
+                    """
+                )
+                curr.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS set_passwords_timestamp
+                    AFTER UPDATE ON user_passwords
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE passwords
+                        SET updated_at = CURRENT_TIMESTAMP
+                        WHERE id = OLD.id;
+                    END;
+
                     """
                 )
                 conn.commit()
