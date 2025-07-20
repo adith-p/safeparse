@@ -138,6 +138,7 @@ celerybeat.pid
 .env
 .envrc
 .venv
+.idea/
 env/
 venv/
 ENV/
@@ -205,3 +206,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# custom
+
+vault.db

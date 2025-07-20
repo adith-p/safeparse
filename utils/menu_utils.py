@@ -1,9 +1,8 @@
 from simple_term_menu import TerminalMenu
 from beaupy import confirm, prompt, select, select_multiple
-from beaupy._internals import ValidationError
 
 
-# added docstring using ai and refactored it, so that is why this is very distinct from other files
+# added docstring using AI and refactored it, so that is why this is very distinct from other files
 def show_main_menu():
     """Displays the main application menu and returns the user's choice.
 
@@ -72,7 +71,7 @@ def get_password_config():
         opts,
         tick_character="*",
         minimal_count=1,  # Require at least one option to be chosen
-        title="Select character types to include:",
+        # title="Select character types to include:",
     )
 
     return (selected_opts, pass_len)

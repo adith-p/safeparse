@@ -1,33 +1,9 @@
 import sqlite3
-from pathlib import Path
 import time
-from typing import Callable
 from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
-# def does_schema_exist(curr):
-#     result: list = curr.execute(
-#         """
-#         SELECT tableName FROM sqlite_master WHERE type = 'table' AND name = 'users';
-#         """
-#     )
-#     if not result:
-#         return False
-#     return True
-
-
-# def init():
-
-
-#     conn = apsw.Connection("vault.db")
-#     curr = conn.cursor()
-#     if not does_schema_exist(curr):
-#         result = curr.execute(
-#             """
-#             CREATE TABLE users ()
-#             """
-#         )
 
 DB_FILE = "vault.db"
 
@@ -45,9 +21,7 @@ def does_schema_exist(curr):
     try:
         # Corrected SQL query: use 'name' column instead of 'tableName'
         result = curr.execute(
-            """
-            SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users';
-            """
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users';"
         ).fetchone()  # Use fetchone() to get the first row or None
         return result is not None
     except sqlite3.Error as e:
@@ -97,8 +71,8 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS users (
                         user_id TEXT PRIMARY KEY,
                         username TEXT NOT NULL UNIQUE,
-                        master_password_hash TEXT NOT NULL,
-                        master_password_salt TEXT NOT NULL
+                        master_password_hash BLOB NOT NULL,
+                        master_password_salt BLOB NOT NULL
                     );
                     """
                 )
@@ -111,7 +85,8 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS user_passwords (
                     password_id TEXT PRIMARY KEY,
                     login_username TEXT,
-                    notes TEXT,               
+                    notes TEXT,        
+                    password TEXT,
                     user_id TEXT NOT NULL,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -125,9 +100,9 @@ def init_db():
                     AFTER UPDATE ON user_passwords
                     FOR EACH ROW
                     BEGIN
-                        UPDATE passwords
+                        UPDATE user_passwords
                         SET updated_at = CURRENT_TIMESTAMP
-                        WHERE id = OLD.id;
+                        WHERE password_id = OLD.password_id;
                     END;
 
                     """

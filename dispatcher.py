@@ -2,34 +2,37 @@ import shlex
 
 from rich import print
 
-from utils.menu import (
+from utils.menu_utils import (
     get_password_config,
     show_main_menu,
     show_password_storage_menu,
     show_password_type_menu,
 )
 
-from utils.user_auth import auth_command, is_authenticated
-from arg_parsers.parent_parser import parent_parser
+from utils.users.user_auth import auth_command, is_authenticated, get_current_user_id
+from arg_parsers.parser import parent_parser
 
-from utils.passwords import gen_password
-from utils.user import user_command
+from utils.psw_utils import gen_password
+from utils.users.user import user_command
 
-from beaupy._internals import ValidationError
+from beaupy import ValidationError
+
+from utils.vault import vault
+from utils.vault.display_tables import display_tables
 
 
 def dispatch(raw_string):
     tokens = shlex.split(raw_string)
 
     if not tokens:
-        return
+        return None
 
     parser = parent_parser.parse_args(tokens)
 
     if parser.command != "auth":
         if not is_authenticated():
             print("[red] user should be authenticated first [/red]")
-            return
+            return None
 
     if parser.command == "auth":
         auth_command(parser)
@@ -38,7 +41,7 @@ def dispatch(raw_string):
         # NOTE:- once the password vault have been set up work on this
         user_command(parser)
 
-    elif parser.command == "menu":
+    if parser.command == "menu":
         opt = show_main_menu()
 
         # Option 0: Generate Passwords
@@ -60,14 +63,17 @@ def dispatch(raw_string):
 
         # Option 1: View/Save Passwords
         if opt == 1:
+            current_user_id = get_current_user_id()
             storage_action = show_password_storage_menu()
 
             # View passwords
             if storage_action == 0:
-                print(storage_action)  # Replace with view logic
+                result = vault.get_psw(current_user_id)
+                display_tables(result)
+
 
             # Save password
             if storage_action == 1:
-                print(storage_action)  # Replace with save logic
+                vault.put_paw(current_user_id)
 
-        return True
+    return True
