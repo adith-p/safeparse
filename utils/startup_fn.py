@@ -1,33 +1,9 @@
 import sqlite3
-from pathlib import Path
 import time
-from typing import Callable
 from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
-# def does_schema_exist(curr):
-#     result: list = curr.execute(
-#         """
-#         SELECT tableName FROM sqlite_master WHERE type = 'table' AND name = 'users';
-#         """
-#     )
-#     if not result:
-#         return False
-#     return True
-
-
-# def init():
-
-
-#     conn = apsw.Connection("vault.db")
-#     curr = conn.cursor()
-#     if not does_schema_exist(curr):
-#         result = curr.execute(
-#             """
-#             CREATE TABLE users ()
-#             """
-#         )
 
 DB_FILE = "vault.db"
 
@@ -45,9 +21,7 @@ def does_schema_exist(curr):
     try:
         # Corrected SQL query: use 'name' column instead of 'tableName'
         result = curr.execute(
-            """
-            SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users';
-            """
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users';"
         ).fetchone()  # Use fetchone() to get the first row or None
         return result is not None
     except sqlite3.Error as e:
@@ -87,19 +61,50 @@ def init_db():
             # print(f"Checking if database schema exists in {DB_FILE}...")
             if not schema_exist:
                 # print("Schema does not exist. Creating 'users' table...")
-                progress_counter.label = "Creating user table..."
+                progress_counter.label = "Creating user tables..."
                 for i in range(20):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
 
                 curr.execute(
                     """
-                    CREATE TABLE users (
-                        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    CREATE TABLE IF NOT EXISTS users (
+                        user_id TEXT PRIMARY KEY,
                         username TEXT NOT NULL UNIQUE,
-                        master_password_hash TEXT NOT NULL,
-                        master_password_salt TEXT NOT NULL
+                        master_password_hash BLOB NOT NULL,
+                        master_password_salt BLOB NOT NULL
                     );
+                    """
+                )
+                conn.commit()
+                for i in range(10):
+                    time.sleep(0.0100)
+                    progress_counter.item_completed()
+                curr.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS user_passwords (
+                    password_id TEXT PRIMARY KEY,
+                    login_username TEXT,
+                    notes TEXT,        
+                    password TEXT,
+                    user_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+                    );
+                    """
+                )
+                curr.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS set_passwords_timestamp
+                    AFTER UPDATE ON user_passwords
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE user_passwords
+                        SET updated_at = CURRENT_TIMESTAMP
+                        WHERE password_id = OLD.password_id;
+                    END;
+
                     """
                 )
                 conn.commit()

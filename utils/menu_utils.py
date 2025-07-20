@@ -2,8 +2,7 @@ from simple_term_menu import TerminalMenu
 from beaupy import confirm, prompt, select, select_multiple
 
 
-
-# added docstring using ai and refactored it, so that is why this is very distinct from other files
+# added docstring using AI and refactored it, so that is why this is very distinct from other files
 def show_main_menu():
     """Displays the main application menu and returns the user's choice.
 
@@ -76,3 +75,23 @@ def get_password_config():
     )
 
     return (selected_opts, pass_len)
+
+
+def show_password_storage_menu():
+    """Displays the password storage and retrieval menu.
+
+    This menu allows the user to choose between viewing previously saved
+    passwords or saving a new one.
+
+    Returns:
+        int: The index of the selected menu item.
+             0: view
+             1: save
+    """
+    opts = [
+        "view",
+        "save",
+    ]
+    terminal_menu = TerminalMenu(opts, title="Password Storage")
+    menu_entry = terminal_menu.show()
+    return menu_entry

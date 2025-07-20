@@ -1,16 +1,13 @@
 from prompt_toolkit import PromptSession
-from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.patch_stdout import patch_stdout
-
 
 from rich import print
 
 
-from arg_dispatcher import dispatch
+from dispatcher import dispatch
 
 
-from utils.user_auth import is_authenticated
-from utils.startup import init_db
+from utils.startup_fn import init_db
+from utils.users.user_auth import is_authenticated
 
 
 # Interactive loop
@@ -30,7 +27,7 @@ def main():
     while True:
         try:
 
-            prompt_text = "(auth-cli) " if is_authenticated() else "(unauth) "
+            prompt_text = "(auth-cli) " if is_authenticated() else "(un-auth) "
             text = session.prompt(prompt_text)
 
             if dispatch(text) is False:

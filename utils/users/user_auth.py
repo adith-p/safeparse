@@ -1,25 +1,18 @@
-from arg_parsers.subparsers import parent_parser, auth_subparser
 from rich import print
 
 
 from prompt_toolkit import PromptSession
 import bcrypt
 from getpass import getpass
+from uuid import uuid4
 
-from .db import Database_controller
+from utils.database_controllers import UserDbController
 
-
-db = {"admin": "123"}
-
-user_authenticated = None
-
-
-# def get_salt(username):
-#     salt = Database_controller().get_salt(username)
-#     if salt is None:
-#         print("salt not found")
-#         return False
-#     return salt
+user_request: dict[str, bool | None] = {
+    "username": None,
+    "user_id": None,
+    "is_authenticated": False,
+}
 
 
 def password_hash(password, salt):
@@ -31,7 +24,7 @@ def hash_password(password):
     return bcrypt.hashpw(password.encode(), password_salt), password_salt
 
 
-def verfy_password(psw, hashed_psw):
+def verify_password(psw, hashed_psw):
     return bcrypt.checkpw(psw.encode(), hashed_psw)
 
 
@@ -41,21 +34,21 @@ def login():
     username = session.prompt("Username > ").strip()
     if not username:
         print(" Username cannot be empty.")
-        return
+        return None
 
     password = getpass("Password > ").strip()
     if not password:
         print("Password cannot be empty.")
-        return
+        return None
     # parser = parent_parser.parse_args(arg)
     # return authenticate(username=parser.username, password=parser.password)
     return authenticate(username=username, password=password)
 
 
 def authenticate(username, password) -> bool:
-    global user_authenticated
+    # global user_authenticated
 
-    user_data = Database_controller().get_user(username)
+    user_data = UserDbController().get_user(username)
 
     if user_data is None:
         print("user does not exist")
@@ -64,8 +57,10 @@ def authenticate(username, password) -> bool:
     if user_data[1] == username:
 
         hashed_password = password_hash(password=password, salt=user_data[3])
-        if verfy_password(password, hashed_password):
-            user_authenticated = True
+        if verify_password(password, hashed_password):
+            user_request["is_authenticated"] = True
+            user_request["username"] = username
+            user_request["user_id"] = user_data[0]
 
             return True
         print("[red] password or username is incorrect [/red]")
@@ -78,7 +73,7 @@ def authenticate(username, password) -> bool:
 
 def create_user(parser):
 
-    db = Database_controller()
+    db = UserDbController()
     session = PromptSession()
 
     # Check if user already exists
@@ -97,14 +92,24 @@ def create_user(parser):
         return False
 
     password_hash, password_salt = hash_password(password)
-
-    curr = Database_controller().create_user(username, password_hash, password_salt)
+    user_id = str(uuid4())
+    curr = UserDbController().create_user(
+        user_id, username, password_hash, password_salt
+    )
 
     return True
 
 
 def is_authenticated() -> bool:
-    return user_authenticated
+    return user_request["is_authenticated"]
+
+
+def get_current_username() -> str | None:
+    return user_request["username"]
+
+
+def get_current_user_id() -> str | None:
+    return user_request["user_id"]
 
 
 def auth_command(parser):
@@ -125,5 +130,4 @@ def auth_command(parser):
             print("[red] user already exist[/red] try - [purple] auth user [/purple]")
             return False
 
-    # elif sub_cmd == "--help":
-    #     print(parent_parser.add_help())
+    return True
