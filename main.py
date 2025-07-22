@@ -8,10 +8,13 @@ from dispatcher import dispatch
 
 from utils.startup_fn import init_db
 from utils.users.user_auth import is_authenticated
+from utils.event_logging.logger import logger
 
 
 # Interactive loop
 def main():
+    # NOTE: .log can be tampered with as of now so, once the encryption module is set up i will encrypt and hash the .log file
+    logger.info("Application starting...")
     print_this = """
          ███████  █████  ███████ ███████ ██████   █████  ██████  ███████ ███████
          ██      ██   ██ ██      ██      ██   ██ ██   ██ ██   ██ ██      ██
@@ -23,6 +26,7 @@ def main():
     init_db()
     print("[bold magenta]🔐 Welcome to SafeParse[/bold magenta]")
     print("Type [bold] auth user [/bold] to continue")
+    logger.info("Application started")
     session = PromptSession()
     while True:
         try:

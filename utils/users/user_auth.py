@@ -1,3 +1,5 @@
+from typing import Any
+
 from rich import print
 
 
@@ -7,6 +9,7 @@ from getpass import getpass
 from uuid import uuid4
 
 from utils.database_controllers import UserDbController
+from utils.event_logging.logger import logger
 
 user_request: dict[str, bool | None] = {
     "username": None,
@@ -28,7 +31,7 @@ def verify_password(psw, hashed_psw):
     return bcrypt.checkpw(psw.encode(), hashed_psw)
 
 
-def login():
+def login() -> tuple[bool, Any] | None:
     session = PromptSession()
 
     username = session.prompt("Username > ").strip()
@@ -42,13 +45,13 @@ def login():
         return None
     # parser = parent_parser.parse_args(arg)
     # return authenticate(username=parser.username, password=parser.password)
-    return authenticate(username=username, password=password)
+    return authenticate(username=username, password=password),username
 
 
 def authenticate(username, password) -> bool:
     # global user_authenticated
-
-    user_data = UserDbController().get_user(username)
+    user_data = UserDbController().get_user_by_username(username)
+    # user_data = UserDbController().get_user(username)
 
     if user_data is None:
         print("user does not exist")
@@ -97,11 +100,15 @@ def create_user(parser):
         user_id, username, password_hash, password_salt
     )
 
-    return True
+    return True, username
 
 
 def is_authenticated() -> bool:
     return user_request["is_authenticated"]
+
+
+def set_auth(flag: bool):
+    user_request["is_authenticated"] = flag
 
 
 def get_current_username() -> str | None:
@@ -115,19 +122,24 @@ def get_current_user_id() -> str | None:
 def auth_command(parser):
 
     if parser.auth_command == "user":
-
-        if login():
+        login_object = login()
+        if login_object[0]:
             print("[green] user authenticated [/green]")
+            logger.info("Authentication successful for user: '%s'", login_object[1])
         else:
+            logger.warning("user authentication failed for user: '%s'", login_object[1])
             return False
 
     elif parser.auth_command == "create-user":
-        if create_user(parser):
+        user_creation_object = create_user(parser)
+        if user_creation_object[0]:
             print(
                 "[green] user created successfully [/green] try [bold magenta] auth [/bold magenta]"
             )
+            logger.info("user created with username %s", get_current_username())
         else:
             print("[red] user already exist[/red] try - [purple] auth user [/purple]")
+            logger.warning("Failed to create user: username '%s' already exists.", user_creation_object[1])
             return False
 
     return True

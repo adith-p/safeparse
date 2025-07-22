@@ -15,7 +15,7 @@ def show_main_menu():
              1: view/save passwords
              2: quit
     """
-    opts = ["generate password", "view/save passwords", "quit"]
+    opts = ["generate password", "view/save passwords", "view log","quit"]
     terminal_menu = TerminalMenu(opts, title="Main Menu")
     menu_entry = terminal_menu.show()
     return menu_entry

@@ -1,5 +1,3 @@
-from pycparser.ply.yacc import resultlimit
-
 from utils.database_controllers import PasswordDbController
 from .psw_forms import get_psw_form, view_psw_form
 

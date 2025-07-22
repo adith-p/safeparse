@@ -15,7 +15,7 @@ class UserDbController:
         return sqlite3.connect(self.db_name)
 
     def _execute(
-            self, query: str, params: Tuple[Any, ...] = (), fetchone=False, commit=False
+        self, query: str, params: Tuple[Any, ...] = (), fetchone=False, commit=False
     ) -> Optional[Any]:
         conn = self.get_connection()
         curr = conn.cursor()
@@ -32,7 +32,7 @@ class UserDbController:
             conn.close()
 
     def create_user(
-            self, user_id: str, username: str, hashed_password: str, hash_salt: str
+        self, user_id: str, username: str, hashed_password: str, hash_salt: str
     ):
         query = "INSERT INTO users(user_id, username, master_password_hash, master_password_salt) VALUES (?, ?, ?, ?);"
         self._execute(
@@ -46,24 +46,28 @@ class UserDbController:
             commit=True,
         )
 
-    def get_user(self, username: str) -> Optional[Tuple]:
+    def get_user(self, user_id: str) -> Optional[Tuple]:
+        query = "SELECT * FROM users WHERE user_id = ?;"
+        return self._execute(query, (user_id,), fetchone=True)
+
+    def get_user_by_username(self, username: str) -> Optional[Tuple]:
         query = "SELECT * FROM users WHERE username = ?;"
         return self._execute(query, (username,), fetchone=True)
 
-    def get_passhash(self, username: str) -> Optional[Tuple]:
-        query = "SELECT master_password_hash FROM users WHERE username = ?;"
-        return self._execute(query, (username,), fetchone=True)
+    def get_passhash(self, user_id: str) -> Optional[Tuple]:
+        query = "SELECT master_password_hash FROM users WHERE user_id = ?;"
+        return self._execute(query, (user_id,), fetchone=True)
 
-    def get_salt(self, username: str) -> Optional[Tuple]:
-        query = "SELECT master_password_salt FROM users WHERE username = ?;"
-        return self._execute(query, (username,), fetchone=True)
+    def get_salt(self, user_id: str) -> Optional[Tuple]:
+        query = "SELECT master_password_salt FROM users WHERE user_id = ?;"
+        return self._execute(query, (user_id,), fetchone=True)
 
-    def remove_user(self, username: str, password_hash: str) -> Optional[Tuple]:
-        query = "DELETE FROM users WHERE username = ? and master_password_hash = ?;"
+    def remove_user(self, user_id: str, password_hash: str) -> Optional[Tuple]:
+        query = "DELETE FROM users WHERE user_id = ? and master_password_hash = ?;"
         return self._execute(
             query,
             (
-                username,
+                user_id,
                 password_hash,
             ),
             commit=True,
@@ -78,12 +82,12 @@ class PasswordDbController:
         return sqlite3.connect(self.db_name)
 
     def _execute(
-            self,
-            query: str,
-            params: Tuple[Any, ...] = (),
-            fetchone: bool = False,
-            fetchall: bool = False,
-            commit: bool = False,
+        self,
+        query: str,
+        params: Tuple[Any, ...] = (),
+        fetchone: bool = False,
+        fetchall: bool = False,
+        commit: bool = False,
     ) -> Optional[Any]:
         conn = self.get_connection()
         curr = conn.cursor()
@@ -105,7 +109,7 @@ class PasswordDbController:
                 conn.close()
 
     def get_passwords(
-            self, current_user_id: str, note: str, login_username: str = None
+        self, current_user_id: str, note: str, login_username: str = None
     ) -> list:
 
         if login_username:
@@ -132,11 +136,11 @@ class PasswordDbController:
 
     #
     def set_password(
-            self,
-            current_user_id: str,
-            note: str,
-            login_password: str,
-            login_username: str = None,
+        self,
+        current_user_id: str,
+        note: str,
+        login_password: str,
+        login_username: str = None,
     ) -> Any | None:
         password_id = str(uuid.uuid4())
         if login_username:

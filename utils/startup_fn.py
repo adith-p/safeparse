@@ -4,6 +4,8 @@ from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
+from utils.event_logging.logger import logger
+
 
 DB_FILE = "vault.db"
 
@@ -52,6 +54,7 @@ def init_db():
             curr = conn.cursor()
             # Step 2: Check schema (40%)
             progress_counter.label = "Checking database schema..."
+            logger.info("Checking database schema...")
             for i in range(20):
                 time.sleep(0.0100)
                 progress_counter.item_completed()
@@ -62,6 +65,7 @@ def init_db():
             if not schema_exist:
                 # print("Schema does not exist. Creating 'users' table...")
                 progress_counter.label = "Creating user tables..."
+                logger.info("Creating user tables...")
                 for i in range(20):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
@@ -109,17 +113,20 @@ def init_db():
                 )
                 conn.commit()
                 print("'users' table created successfully.")
+                logger.info("user related table created successfully.")
             else:
                 progress_counter.label = "Schema already exists..."
                 for i in range(20):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
                 print("Database schema already exists.")
+                logger.info("Database schema already exists.")
 
             progress_counter.label = "Finalizing..."
             for i in range(60):
                 time.sleep(0.0100)
                 progress_counter.item_completed()
+                progress_counter.label = "Finished"
 
         except sqlite3.Error as e:
             print(f"Database initialization error: {e}")
@@ -127,3 +134,4 @@ def init_db():
             if conn:
                 conn.close()
                 print("Database connection closed.")
+
