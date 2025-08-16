@@ -169,7 +169,13 @@ class PasswordDbController:
         return self._execute(query, (password_id,), commit=True)
 
 
-    # def update_password(self, password_id:str, note:str, login_password:str):
-    #     if note:
-    #         query = "UPDATE user_passwords SET notes = ? WHERE password_id = ?;"
+    def update_password(self, password_id:str, update_fields: dict):
+        if not update_fields:
+            return None
 
+        set_clause = ", ".join([f"{field} = ?" for field in update_fields.keys()])
+        query = f"UPDATE user_passwords SET {set_clause} WHERE password_id = ?;"
+
+        values = list(update_fields.values()) + [password_id]
+
+        return self._execute(query, tuple(values), commit=True)

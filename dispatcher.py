@@ -8,6 +8,8 @@ from utils.menu_utils import (
     show_main_menu,
     show_password_storage_menu,
     show_password_type_menu,
+    update_password_menu,
+
 )
 
 from utils.users.user_auth import auth_command, is_authenticated, get_current_user_id
@@ -93,7 +95,14 @@ def dispatch(raw_string):
 
             # Update passwords
             if storage_action == 2:
-                pass
+                saved_password = vault.get_psw(current_user_id)
+                display_tables(saved_password)
+                session = PromptSession()
+                pass_id = session.prompt("Enter the password id > ")
+                # custom_field = update_password_menu()
+                vault.update_password(pass_id,update_password_menu())
+
+
 
             # Delete Password
             if storage_action == 3:

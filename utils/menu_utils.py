@@ -100,3 +100,31 @@ def show_password_storage_menu():
     terminal_menu = TerminalMenu(opts, title="Password Storage")
     menu_entry = terminal_menu.show()
     return menu_entry
+
+
+def update_password_menu():
+    """Displays the password update menu.
+
+        This menu allows the user to choose which field of a saved password
+        entry they want to update.
+
+        Returns:
+            int: The index of the selected menu item.
+                 0: username
+                 1: notes
+                 2: password
+                 3: quit
+    """
+    opts = [
+        "login_username",
+        "notes",
+        "password",
+    ]
+
+    selected_opts = select_multiple(
+        opts,
+        tick_character="*",
+        minimal_count=1,  # Require at least one option to be chosen
+        # title="Select character types to include:",
+    )
+    return selected_opts

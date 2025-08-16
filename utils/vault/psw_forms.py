@@ -20,3 +20,14 @@ def view_psw_form() -> tuple[str, str]:
     search_params = session.prompt("search params >")
 
     return search_params
+
+
+def request_password_id():
+    session = PromptSession()
+    password_id = session.prompt("password id > ")
+    return password_id
+
+def update_psw_form(attribute: str) -> tuple[str, str]:
+    session = PromptSession()
+    attribute_prompt = session.prompt(f"{attribute} > ")
+    return attribute_prompt

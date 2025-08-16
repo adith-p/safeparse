@@ -1,5 +1,5 @@
 from utils.database_controllers import PasswordDbController
-from .psw_forms import get_psw_form, view_psw_form
+from .psw_forms import get_psw_form, view_psw_form, update_psw_form
 from prompt_toolkit import PromptSession
 from rich import print
 from ..users.user_auth import password_hash
@@ -35,3 +35,12 @@ def delete_paw():
     PasswordDbController().delete_password(pass_id)
     print("Password [red]deleted[/Red]")
 
+
+def update_password(password_id: str, custom_fields: list[int]):
+    field_list = {}
+    print(custom_fields)
+    for field in custom_fields:
+        field_list[field] = update_psw_form(field)
+
+    PasswordDbController().update_password(password_id,field_list)
+    print("[bold green]Password have been updated [/bold green]")
