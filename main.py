@@ -1,5 +1,4 @@
 from prompt_toolkit import PromptSession
-
 from rich import print
 
 
@@ -7,7 +6,7 @@ from dispatcher import dispatch
 
 
 from utils.startup_fn import init_db
-from utils.users.user_auth import is_authenticated
+from utils.users.user_auth import create_user, is_authenticated
 from utils.event_logging.logger import logger
 
 
@@ -23,7 +22,9 @@ def main():
          ███████ ██   ██ ██      ███████ ██      ██   ██ ██   ██ ███████ ███████
      """
     print(print_this)
-    init_db()
+    status = init_db()
+    if not status:
+        create_user()
     print("[bold magenta]🔐 Welcome to SafeParse[/bold magenta]")
     print("Type [bold] auth user [/bold] to continue")
     logger.info("Application started")

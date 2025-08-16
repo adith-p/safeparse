@@ -4,7 +4,7 @@ from rich import print
 
 def display_tables(values):
     table = Table()
-    cols = ["login username", "login password", "note", "created at", "updated at"]
+    cols = ["password id","login username", "login password", "note", "created at", "updated at"]
 
     for col in cols:
         table.add_column(col)

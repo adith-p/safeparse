@@ -1,5 +1,6 @@
 import sqlite3
 import time
+
 from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
@@ -29,6 +30,15 @@ def does_schema_exist(curr):
     except sqlite3.Error as e:
         print(f"Error checking schema existence: {e}")
         return False
+
+
+"""
+def create_user():
+    session = PromptSession()
+    username = session.prompt("enter username > ")
+    password = getpass("enter password > ")
+    return 
+"""
 
 
 def init_db():
@@ -66,7 +76,7 @@ def init_db():
                 # print("Schema does not exist. Creating 'users' table...")
                 progress_counter.label = "Creating user tables..."
                 logger.info("Creating user tables...")
-                for i in range(20):
+                for _ in range(20):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
 
@@ -81,7 +91,7 @@ def init_db():
                     """
                 )
                 conn.commit()
-                for i in range(10):
+                for _ in range(10):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
                 curr.execute(
@@ -116,22 +126,21 @@ def init_db():
                 logger.info("user related table created successfully.")
             else:
                 progress_counter.label = "Schema already exists..."
-                for i in range(20):
+                for _ in range(20):
                     time.sleep(0.0100)
                     progress_counter.item_completed()
                 print("Database schema already exists.")
                 logger.info("Database schema already exists.")
 
             progress_counter.label = "Finalizing..."
-            for i in range(60):
+            for _ in range(60):
                 time.sleep(0.0100)
                 progress_counter.item_completed()
                 progress_counter.label = "Finished"
-
+            return schema_exist
         except sqlite3.Error as e:
             print(f"Database initialization error: {e}")
         finally:
             if conn:
                 conn.close()
                 print("Database connection closed.")
-

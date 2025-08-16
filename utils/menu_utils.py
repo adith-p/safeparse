@@ -15,7 +15,7 @@ def show_main_menu():
              1: view/save passwords
              2: quit
     """
-    opts = ["generate password", "view/save passwords", "view log","quit"]
+    opts = ["generate password", "view/save passwords", "view log", "quit"]
     terminal_menu = TerminalMenu(opts, title="Main Menu")
     menu_entry = terminal_menu.show()
     return menu_entry
@@ -87,10 +87,15 @@ def show_password_storage_menu():
         int: The index of the selected menu item.
              0: view
              1: save
+             2: update
+             3:delete
     """
+
     opts = [
         "view",
         "save",
+        "update",
+        "delete",
     ]
     terminal_menu = TerminalMenu(opts, title="Password Storage")
     menu_entry = terminal_menu.show()

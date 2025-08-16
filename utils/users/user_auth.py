@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TypedDict
 
 from rich import print
 
@@ -11,7 +11,14 @@ from uuid import uuid4
 from utils.database_controllers import UserDbController
 from utils.event_logging.logger import logger
 
-user_request: dict[str, bool | None] = {
+
+class UserReuest(TypedDict):
+    username: str | None
+    user_id: str | None
+    is_authenticated: bool
+
+
+user_request: UserReuest = {
     "username": None,
     "user_id": None,
     "is_authenticated": False,
@@ -45,7 +52,7 @@ def login() -> tuple[bool, Any] | None:
         return None
     # parser = parent_parser.parse_args(arg)
     # return authenticate(username=parser.username, password=parser.password)
-    return authenticate(username=username, password=password),username
+    return authenticate(username=username, password=password), username
 
 
 def authenticate(username, password) -> bool:
@@ -74,7 +81,7 @@ def authenticate(username, password) -> bool:
     return False
 
 
-def create_user(parser):
+def create_user():
 
     db = UserDbController()
     session = PromptSession()
@@ -94,16 +101,16 @@ def create_user(parser):
         print("['red']Password cannot be empty.['/red']")
         return False
 
-    password_hash, password_salt = hash_password(password)
+    psw_hash, password_salt = hash_password(password)
     user_id = str(uuid4())
     curr = UserDbController().create_user(
-        user_id, username, password_hash, password_salt
+        user_id, username, psw_hash, password_salt
     )
 
     return True, username
 
 
-def is_authenticated() -> bool:
+def is_authenticated() -> bool | None:
     return user_request["is_authenticated"]
 
 
@@ -131,7 +138,7 @@ def auth_command(parser):
             return False
 
     elif parser.auth_command == "create-user":
-        user_creation_object = create_user(parser)
+        user_creation_object = create_user()
         if user_creation_object[0]:
             print(
                 "[green] user created successfully [/green] try [bold magenta] auth [/bold magenta]"
@@ -139,7 +146,10 @@ def auth_command(parser):
             logger.info("user created with username %s", get_current_username())
         else:
             print("[red] user already exist[/red] try - [purple] auth user [/purple]")
-            logger.warning("Failed to create user: username '%s' already exists.", user_creation_object[1])
+            logger.warning(
+                "Failed to create user: username '%s' already exists.",
+                user_creation_object[1],
+            )
             return False
 
     return True

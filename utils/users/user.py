@@ -14,14 +14,20 @@ def user_command(parser):
         password: str = session.prompt("password > ")
         if password.strip() == "":
             print("[red] Password cannot be empty [/red]")
-            logger.warning("Account deletion failed for user_id %s: Empty password submitted.", current_user_id)
+            logger.warning(
+                "Account deletion failed for user_id %s: Empty password submitted.",
+                current_user_id,
+            )
             return False
 
         if pass_salt := user_db.get_salt(current_user_id):
             psw_hash = password_hash(password, pass_salt[0])
             if psw_hash != user_db.get_passhash(current_user_id)[0]:
                 print("[red] Password does not match [/red]")
-                logger.warning("Account deletion failed for user_id %s: Incorrect password.", current_user_id)
+                logger.warning(
+                    "Account deletion failed for user_id %s: Incorrect password.",
+                    current_user_id,
+                )
                 return False
 
             UserDbController().remove_user(
@@ -35,7 +41,7 @@ def user_command(parser):
             print("[red]Error: Could not verify user credentials.[/red]")
             logger.error(
                 "Failed to retrieve salt or hash for user_id: %s. This indicates a potential database inconsistency.",
-                current_user_id
+                current_user_id,
             )
             return False
     return True

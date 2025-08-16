@@ -17,9 +17,6 @@ def get_psw_form() -> tuple[str, str, str]:
 
 def view_psw_form() -> tuple[str, str]:
     session = PromptSession()
-    username = session.prompt("username > ")
-    note = session.prompt("Note > ")
-    return (
-        username,
-        note,
-    )
+    search_params = session.prompt("search params >")
+
+    return search_params

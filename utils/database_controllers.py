@@ -32,7 +32,7 @@ class UserDbController:
             conn.close()
 
     def create_user(
-        self, user_id: str, username: str, hashed_password: str, hash_salt: str
+        self, user_id: str, username: bytes, hashed_password: bytes, hash_salt: bytes
     ):
         query = "INSERT INTO users(user_id, username, master_password_hash, master_password_salt) VALUES (?, ?, ?, ?);"
         self._execute(
@@ -109,29 +109,19 @@ class PasswordDbController:
                 conn.close()
 
     def get_passwords(
-        self, current_user_id: str, note: str, login_username: str = None
+        self, current_user_id: str, search_params
     ) -> list:
 
-        if login_username:
-            # Query with both note and username search from the correct table.
-            query = """
-                    SELECT login_username, password, notes, created_at, updated_at
+        query = """
+                    SELECT password_id,login_username, password, notes, created_at, updated_at
                     FROM user_passwords
-                    WHERE user_id = ?
-                      AND notes LIKE ?
-                      AND login_username LIKE ?; \
+                    WHERE user_id = ? 
+                        AND(
+                          notes LIKE ?
+                          OR login_username LIKE ?
+                        ); \
                     """
-            params = (current_user_id, f"%{note}%", f"%{login_username}%")
-        else:
-            # Query with only note search.
-            query = """
-                    SELECT login_username, password, notes, created_at, updated_at
-                    FROM user_passwords
-                    WHERE user_id = ?
-                      AND notes LIKE ?; \
-                    """
-            params = (current_user_id, f"%{note}%")
-
+        params = (current_user_id, f"%{search_params}%", f"%{search_params}%")
         return self._execute(query, params, fetchall=True)
 
     #
@@ -173,3 +163,13 @@ class PasswordDbController:
                 datetime.now(),
             )
         return self._execute(query, params, commit=True)
+
+    def delete_password(self, password_id:str):
+        query = "DELETE FROM user_passwords WHERE password_id = ?;"
+        return self._execute(query, (password_id,), commit=True)
+
+
+    # def update_password(self, password_id:str, note:str, login_password:str):
+    #     if note:
+    #         query = "UPDATE user_passwords SET notes = ? WHERE password_id = ?;"
+

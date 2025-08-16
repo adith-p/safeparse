@@ -1,6 +1,7 @@
 import shlex
 
 from rich import print
+from prompt_toolkit import PromptSession
 
 from utils.menu_utils import (
     get_password_config,
@@ -20,17 +21,18 @@ from beaupy import ValidationError
 from utils.vault import vault
 from utils.vault.display_tables import display_tables
 
-from utils.event_logging.logger import logger,print_log
+from utils.event_logging.logger import logger, print_log
 
 
 def dispatch(raw_string):
+    session = PromptSession()
     tokens = shlex.split(raw_string)
 
     if not tokens:
         return None
 
     parser = parent_parser.parse_args(tokens)
-    logger.info("Dispatching command: %s ",tokens[0])
+    logger.info("Dispatching command: %s ", tokens[0])
 
     command = parser.command
     if command != "auth" and not is_authenticated():
@@ -80,12 +82,24 @@ def dispatch(raw_string):
             if storage_action == 0:
                 result = vault.get_psw(current_user_id)
                 display_tables(result)
-                logger.info("User (id: %s) is viewed passwords from the vault.", current_user_id)
+                logger.info(
+                    "User (id: %s) is viewed passwords from the vault.", current_user_id
+                )
 
             # Save password
             if storage_action == 1:
                 vault.put_paw(current_user_id)
                 logger.info("User (id: %s) saved an password", current_user_id)
+
+            # Update passwords
+            if storage_action == 2:
+                pass
+
+            # Delete Password
+            if storage_action == 3:
+                saved_passwords = vault.get_psw(current_user_id)
+                display_tables(saved_passwords)
+                vault.delete_paw()
 
         if opt == 2:
             # Option 2: viewing log
