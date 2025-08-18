@@ -1,6 +1,7 @@
 import sqlite3
 import time
 
+
 from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
@@ -85,6 +86,7 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS users (
                         user_id TEXT PRIMARY KEY,
                         username TEXT NOT NULL UNIQUE,
+                        email TEXT NOT NULL UNIQUE,
                         master_password_hash BLOB NOT NULL,
                         master_password_salt BLOB NOT NULL
                     );

@@ -32,14 +32,20 @@ class UserDbController:
             conn.close()
 
     def create_user(
-        self, user_id: str, username: bytes, hashed_password: bytes, hash_salt: bytes
+        self,
+        user_id: str,
+        username: str,
+        email: str,
+        hashed_password: bytes,
+        hash_salt: bytes,
     ):
-        query = "INSERT INTO users(user_id, username, master_password_hash, master_password_salt) VALUES (?, ?, ?, ?);"
+        query = "INSERT INTO users(user_id, username, email, master_password_hash, master_password_salt) VALUES (?, ?, ?,?, ?);"
         self._execute(
             query,
             (
                 user_id,
                 username,
+                email,
                 hashed_password,
                 hash_salt,
             ),
@@ -108,9 +114,7 @@ class PasswordDbController:
             if conn:
                 conn.close()
 
-    def get_passwords(
-        self, current_user_id: str, search_params
-    ) -> list:
+    def get_passwords(self, current_user_id: str, search_params) -> list:
 
         query = """
                     SELECT password_id,login_username, password, notes, created_at, updated_at
@@ -164,12 +168,11 @@ class PasswordDbController:
             )
         return self._execute(query, params, commit=True)
 
-    def delete_password(self, password_id:str):
+    def delete_password(self, password_id: str):
         query = "DELETE FROM user_passwords WHERE password_id = ?;"
         return self._execute(query, (password_id,), commit=True)
 
-
-    def update_password(self, password_id:str, update_fields: dict):
+    def update_password(self, password_id: str, update_fields: dict):
         if not update_fields:
             return None
 

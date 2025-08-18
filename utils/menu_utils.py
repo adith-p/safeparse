@@ -1,5 +1,5 @@
 from simple_term_menu import TerminalMenu
-from beaupy import confirm, prompt, select, select_multiple
+from beaupy import prompt, select_multiple
 
 
 # added docstring using AI and refactored it, so that is why this is very distinct from other files
@@ -15,7 +15,13 @@ def show_main_menu():
              1: view/save passwords
              2: quit
     """
-    opts = ["generate password", "view/save passwords", "view log", "quit"]
+    opts = [
+        "Generate password",
+        "Manage passwords",
+        "View logs",
+        "Encryption",
+        "Quit",
+    ]
     terminal_menu = TerminalMenu(opts, title="Main Menu")
     menu_entry = terminal_menu.show()
     return menu_entry
@@ -105,15 +111,15 @@ def show_password_storage_menu():
 def update_password_menu():
     """Displays the password update menu.
 
-        This menu allows the user to choose which field of a saved password
-        entry they want to update.
+    This menu allows the user to choose which field of a saved password
+    entry they want to update.
 
-        Returns:
-            int: The index of the selected menu item.
-                 0: username
-                 1: notes
-                 2: password
-                 3: quit
+    Returns:
+        int: The index of the selected menu item.
+             0: username
+             1: notes
+             2: password
+             3: quit
     """
     opts = [
         "login_username",
@@ -128,3 +134,63 @@ def update_password_menu():
         # title="Select character types to include:",
     )
     return selected_opts
+
+
+def show_enc_menu():
+    opts = [
+        "Key management",
+        "Encrypt Things",
+        "decrypt things",
+        "contacts",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="Encryption functionalities")
+    terminal_enc = terminal_menu.show()
+
+    return terminal_enc
+
+
+def show_enc_km_menu():
+    opts = [
+        "list public keys",
+        "list private keys",
+        "generate new key-pairs",
+        "import public key",
+        "export public key",
+        "delete key",
+        "revoke key",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="key management menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_enc_edt_menu():
+    opts = [
+        "text messages",
+        "files",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="encryption and decryption menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_enc_contacts_menu():
+    opts = [
+        "view contacts",
+        "add contacts",
+        "update contacts",
+        "delete contacts",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="contact menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_key_menu(opts: list):
+    key_menu = TerminalMenu(opts, title="Select the public/private key")
+    key_selection = key_menu.show()
+    return key_selection
