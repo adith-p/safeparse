@@ -1,4 +1,5 @@
 from typing import Any, TypedDict
+from typing_extensions import NoExtraItems
 
 from rich import print
 
@@ -24,6 +25,7 @@ class UserRequest(TypedDict):
 user_request: UserRequest = {
     "username": None,
     "user_id": None,
+    "email": None,
     "is_authenticated": False,
 }
 
