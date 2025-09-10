@@ -153,9 +153,7 @@ def show_enc_menu():
 def show_enc_km_menu():
     opts = [
         "list public keys",
-        "list private keys",
         "generate new key-pairs",
-        "import public key",
         "export public key",
         "delete key",
         "revoke key",
@@ -166,7 +164,7 @@ def show_enc_km_menu():
     return terminal_enc
 
 
-def show_enc_edt_menu():
+def show_enc_edt_menu() -> int:
     opts = [
         "text messages",
         "files",
@@ -177,7 +175,7 @@ def show_enc_edt_menu():
     return terminal_enc
 
 
-def show_enc_contacts_menu():
+def show_enc_contacts_menu() -> int:
     opts = [
         "view contacts",
         "add contacts",
@@ -186,6 +184,17 @@ def show_enc_contacts_menu():
     ]
 
     terminal_menu = TerminalMenu(opts, title="contact menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_key_length_menu():
+    opts = [
+        "RSA, 4096 bits (Recommended)",
+        "RSA, 2048 bits (Good for compatibility)",
+        "ECC (Elliptic Curve Cryptography)",
+    ]
+    terminal_menu = TerminalMenu(opts, title="key type and size menu")
     terminal_enc = terminal_menu.show()
     return terminal_enc
 
