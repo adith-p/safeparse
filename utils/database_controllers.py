@@ -4,10 +4,12 @@ from datetime import datetime
 
 # import uuid
 from sqlite3 import Connection
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Literal
 
 
-class UserDbController:
+
+
+class Db_controller:
     def __init__(self):
         self.db_name = "vault.db"
 
@@ -15,7 +17,12 @@ class UserDbController:
         return sqlite3.connect(self.db_name)
 
     def _execute(
-        self, query: str, params: Tuple[Any, ...] = (), fetchone=False, commit=False
+        self,
+        query: str,
+        params: Tuple[Any, ...] = (),
+        fetchone: bool = False,
+        fetchall: bool = False,
+        commit: bool = False,
     ) -> Optional[Any]:
         conn = self.get_connection()
         curr = conn.cursor()
@@ -25,11 +32,18 @@ class UserDbController:
                 conn.commit()
             if fetchone:
                 return curr.fetchone()
-            return curr
+            if fetchall:
+                return curr.fetchall()
         except Exception as e:
             raise e
         finally:
             conn.close()
+
+
+class UserDbController(Db_controller):
+
+    def __init__(self):
+        super().__init__()
 
     def create_user(
         self,
@@ -80,39 +94,10 @@ class UserDbController:
         )
 
 
-class PasswordDbController:
+class PasswordDbController(Db_controller):
+
     def __init__(self):
-        self.db_name = "vault.db"
-
-    def get_connection(self) -> Connection:
-        return sqlite3.connect(self.db_name)
-
-    def _execute(
-        self,
-        query: str,
-        params: Tuple[Any, ...] = (),
-        fetchone: bool = False,
-        fetchall: bool = False,
-        commit: bool = False,
-    ) -> Optional[Any]:
-        conn = self.get_connection()
-        curr = conn.cursor()
-
-        try:
-            curr.execute(query, params)
-
-            if commit:
-                conn.commit()
-            if fetchone:
-                return curr.fetchone()
-            if fetchall:
-                return curr.fetchall()
-
-        except Exception as e:
-            raise e
-        finally:
-            if conn:
-                conn.close()
+        super().__init__()
 
     def get_passwords(self, current_user_id: str, search_params) -> list:
 
@@ -128,13 +113,12 @@ class PasswordDbController:
         params = (current_user_id, f"%{search_params}%", f"%{search_params}%")
         return self._execute(query, params, fetchall=True)
 
-    #
     def set_password(
         self,
         current_user_id: str,
         note: str,
         login_password: str,
-        login_username: str = None,
+        login_username: str | None = None,
     ) -> Any | None:
         password_id = str(uuid.uuid4())
         if login_username:
