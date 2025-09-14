@@ -1,19 +1,16 @@
 from .EncryptionManager import EncryptionManager
-from utils.menu_utils import (
+from safeparse.utils.menu_utils import (
     show_enc_km_menu,
     show_enc_contacts_menu,
-    show_enc_edt_menu,
     show_key_menu,
     show_available_contacts,
     show_contact_fields,
 )
 from rich import print
-from utils.users.user_auth import user_request
-from utils.database_controllers import ContactDbController
-from utils.vault.display_tables import display_tables_contact
+from safeparse.core.users.user_auth import user_request
+from safeparse.db.controllers import ContactDbController
+from safeparse.core.vault.display_tables import  display_tables_contact
 from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter, Completer
-from gnupg import Crypt
 
 
 def key_extractor(key: list[dict]):
