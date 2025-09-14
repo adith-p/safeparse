@@ -1,5 +1,5 @@
-from rich.table import Table
 from rich import print
+from rich.table import Table
 
 
 def display_tables(values):

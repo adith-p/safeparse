@@ -1,5 +1,4 @@
 from typing import Any, TypedDict
-from typing_extensions import NoExtraItems
 
 from rich import print
 
@@ -9,10 +8,10 @@ import bcrypt
 from getpass import getpass
 from uuid import uuid4
 
-from utils.database_controllers import UserDbController
-from utils.event_logging.logger import logger
+from safeparse.db.controllers import UserDbController
+from safeparse.logging.logger import logger
 
-from utils.encryption.EncryptionManager import EncryptionManager
+from safeparse.core.encryption.EncryptionManager import EncryptionManager
 
 
 class UserRequest(TypedDict):

@@ -1,7 +1,7 @@
-from utils.database_controllers import UserDbController
-from utils.users.user_auth import get_current_user_id, password_hash, set_auth
+from safeparse.db.controllers import UserDbController
+from safeparse.core.users.user_auth import get_current_user_id, password_hash, set_auth
 from prompt_toolkit import PromptSession
-from utils.event_logging.logger import logger
+from safeparse.logging.logger import logger
 
 
 def user_command(parser):

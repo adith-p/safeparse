@@ -1,8 +1,8 @@
-from utils.database_controllers import PasswordDbController
+from safeparse.db.controllers import PasswordDbController
 from .psw_forms import get_psw_form, view_psw_form, update_psw_form
 from prompt_toolkit import PromptSession
 from rich import print
-from ..users.user_auth import password_hash
+from safeparse.core.users.user_auth import password_hash
 
 
 def get_psw(current_usr_id: str) -> list:

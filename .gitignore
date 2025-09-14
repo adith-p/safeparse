@@ -209,5 +209,5 @@ __marimo__/
 
 
 # custom
-
-vault.db
+data/
+data/vault.db

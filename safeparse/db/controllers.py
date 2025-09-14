@@ -4,14 +4,16 @@ from datetime import datetime
 
 # import uuid
 from sqlite3 import Connection
-from typing import Any, Optional, Tuple, Literal
+from typing import Any, Optional, Tuple
+
+from safeparse.setting import VAULT_DB
 
 
 
 
 class Db_controller:
     def __init__(self):
-        self.db_name = "vault.db"
+        self.db_name = VAULT_DB
 
     def get_connection(self) -> Connection:
         return sqlite3.connect(self.db_name)

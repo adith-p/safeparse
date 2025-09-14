@@ -6,10 +6,12 @@ from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
-from utils.event_logging.logger import logger
+from safeparse.logging.logger import logger
+from safeparse.setting import VAULT_DB
 
 
-DB_FILE = "vault.db"
+DB_FILE = VAULT_DB
+
 
 
 def does_schema_exist(curr):

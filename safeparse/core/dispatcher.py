@@ -3,8 +3,8 @@ import shlex
 from rich import print
 from prompt_toolkit import PromptSession
 
-from utils.encryption.enc_controller import render_sub_menus
-from utils.menu_utils import (
+from safeparse.core.encryption.enc_controller import render_sub_menus
+from safeparse.utils.menu_utils import (
     get_password_config,
     show_enc_menu,
     show_main_menu,
@@ -13,18 +13,18 @@ from utils.menu_utils import (
     update_password_menu,
 )
 
-from utils.users.user_auth import auth_command, is_authenticated, get_current_user_id
-from arg_parsers.parser import parent_parser
+from safeparse.core.users.user_auth import auth_command, is_authenticated, get_current_user_id
+from safeparse.cli.parser import parent_parser
 
-from utils.psw_utils import gen_password
-from utils.users.user import user_command
+from safeparse.utils.psw_utils import gen_password
+from safeparse.core.users.user import user_command
 
 from beaupy import ValidationError
 
-from utils.vault import vault
-from utils.vault.display_tables import display_tables
+from safeparse.core.vault import vault
+from safeparse.core.vault.display_tables import display_tables
 
-from utils.event_logging.logger import logger, print_log
+from safeparse.logging.logger import logger, print_log
 
 
 def dispatch(raw_string):
