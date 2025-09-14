@@ -203,3 +203,20 @@ def show_key_menu(opts: list):
     key_menu = TerminalMenu(opts, title="Select the public/private key")
     key_selection = key_menu.show()
     return key_selection
+
+
+# encryption + contact display/selection
+def show_available_contacts(opts: list):
+    key_menu = TerminalMenu(opts, title="select the contact")
+    key_selection = key_menu.show()
+    return key_selection
+
+def show_contact_fields():
+    opts = [
+        "contact name",
+        "contact email",
+        "public key fingerprint",
+    ]
+    selected_opts = select_multiple(opts, tick_character="*", minimal_count=1)
+    return selected_opts
+
