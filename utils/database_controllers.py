@@ -182,3 +182,65 @@ class PasswordDbController:
         values = list(update_fields.values()) + [password_id]
 
         return self._execute(query, tuple(values), commit=True)
+
+
+class ContactDbController(Db_controller):
+    def __init__(self):
+        super().__init__()
+
+    def add_contact(
+        self,
+        contact_name: str,
+        contact_email: str,
+        fingerprint: str,
+    ):
+        contact_id = str(uuid.uuid4())
+        query = "INSERT INTO contacts(contact_id, contact_name, contact_email,key_fingerprint) VALUES (?, ?, ?, ?);"
+        self._execute(
+            query,
+            (
+                contact_id,
+                contact_name,
+                contact_email,
+                fingerprint,
+            ),
+            commit=True,
+        )
+
+    def update_contacts(self, contact_id: str, update_fields: dict):
+        if not update_fields:
+            return None
+
+        set_clause = ", ".join([f"{field} = ?" for field in update_fields.keys()])
+        query = f"UPDATE contacts SET {set_clause} WHERE contact_id = ?;"
+
+        values = list(update_fields.values()) + [contact_id]
+        return self._execute(query,tuple(values,), commit=True)
+
+    def get_all_contacts(self):
+        query = "SELECT contact_name, contact_email, key_fingerprint FROM contacts;"
+        return self._execute(query, fetchall=True)
+
+    def get_contact(self, search_query: str)-> Optional[Any]:
+        query = """
+            SELECT
+                contact_id,
+                contact_name,
+                contact_email,
+                key_fingerprint
+            FROM
+                contacts
+            WHERE
+                contact_name LIKE (?) OR contact_email LIKE (?)
+        """
+        params = (f"%{search_query}%",f"%{search_query}%")
+        return self._execute(
+            query,
+            params=params,
+            fetchall=True,
+        )
+
+    def remove_contact(self,contact_id: str):
+        query = "DELETE FROM contacts WHERE contact_id = (?)"
+        return self._execute(query,(contact_id,),commit=True)
+
