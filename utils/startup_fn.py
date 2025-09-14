@@ -123,6 +123,33 @@ def init_db():
 
                     """
                 )
+
+                curr.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS contacts (
+                    contact_id TEXT PRIMARY KEY,
+                    contact_name TEXT NOT NULL,
+                    contact_email TEXT NOT NULL UNIQUE,
+                    key_fingerprint TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """
+                )
+                curr.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS set_contact_timestamp
+                    AFTER UPDATE ON contacts
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE contacts
+                        SET updated_at = CURRENT_TIMESTAMP
+                        WHERE contact_id = OLD.contact_id;
+                    END;
+
+                    """
+                )
+                conn.commit()
                 conn.commit()
                 print("'users' table created successfully.")
                 logger.info("user related table created successfully.")
