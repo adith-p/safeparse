@@ -189,9 +189,9 @@ class ContactDbController(Db_controller):
                 contact_name,
                 contact_email,
                 fingerprint,
-            ),
-            commit=True,
-        )
+                ),
+                commit=True,
+            )
 
     def update_contacts(self, contact_id: str, update_fields: dict):
         if not update_fields:
@@ -201,13 +201,19 @@ class ContactDbController(Db_controller):
         query = f"UPDATE contacts SET {set_clause} WHERE contact_id = ?;"
 
         values = list(update_fields.values()) + [contact_id]
-        return self._execute(query,tuple(values,), commit=True)
+        return self._execute(
+            query,
+            tuple(
+                values,
+            ),
+            commit=True,
+        )
 
     def get_all_contacts(self):
         query = "SELECT contact_name, contact_email, key_fingerprint FROM contacts;"
         return self._execute(query, fetchall=True)
 
-    def get_contact(self, search_query: str)-> Optional[Any]:
+    def get_contact(self, search_query: str) -> Optional[Any]:
         query = """
             SELECT
                 contact_id,
@@ -219,14 +225,13 @@ class ContactDbController(Db_controller):
             WHERE
                 contact_name LIKE (?) OR contact_email LIKE (?)
         """
-        params = (f"%{search_query}%",f"%{search_query}%")
+        params = (f"%{search_query}%", f"%{search_query}%")
         return self._execute(
             query,
             params=params,
             fetchall=True,
         )
 
-    def remove_contact(self,contact_id: str):
+    def remove_contact(self, contact_id: str):
         query = "DELETE FROM contacts WHERE contact_id = (?)"
-        return self._execute(query,(contact_id,),commit=True)
-
+        return self._execute(query, (contact_id,), commit=True)
