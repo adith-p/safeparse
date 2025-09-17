@@ -69,9 +69,7 @@ def authenticate(username, password) -> bool:
         return False
 
     if user_data[1] == username:
-
-        hashed_password = password_hash(password=password, salt=user_data[3])
-        if verify_password(password, hashed_password):
+        if verify_password(psw=password, hashed_psw=user_data[3]):
             user_request["is_authenticated"] = True
             user_request["username"] = username
             user_request["user_id"] = user_data[0]

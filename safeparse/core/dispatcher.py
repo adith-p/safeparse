@@ -13,7 +13,11 @@ from safeparse.utils.menu_utils import (
     update_password_menu,
 )
 
-from safeparse.core.users.user_auth import auth_command, is_authenticated, get_current_user_id
+from safeparse.core.users.user_auth import (
+    auth_command,
+    is_authenticated,
+    get_current_user_id,
+)
 from safeparse.cli.parser import parent_parser
 
 from safeparse.utils.psw_utils import gen_password

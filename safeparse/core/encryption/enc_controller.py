@@ -1,16 +1,21 @@
+import subprocess
+from gnupg import Crypt
 from .EncryptionManager import EncryptionManager
 from safeparse.utils.menu_utils import (
+    show_available_trust_level,
     show_enc_km_menu,
     show_enc_contacts_menu,
     show_key_menu,
     show_available_contacts,
     show_contact_fields,
+    show_enc_edt_menu
 )
 from rich import print
 from safeparse.core.users.user_auth import user_request
 from safeparse.db.controllers import ContactDbController
-from safeparse.core.vault.display_tables import  display_tables_contact
+from safeparse.core.vault.display_tables import display_tables_contact
 from prompt_toolkit import prompt
+from safeparse.core.encryption.encryption_handler import decryption_handler, encryption_handler
 
 
 def key_extractor(key: list[dict]):
@@ -20,13 +25,13 @@ def key_extractor(key: list[dict]):
 
     return key_id_list
 
-
 def key_management_handler(opt_number, enc: EncryptionManager):
-    # list public key
     if opt_number == 0:
+        # list all public keys
         key: list[dict] = enc.get_all_keys()
         key_list = key_extractor(key)
         key_selection = show_key_menu(key_list)
+        print(key)
         try:
             key_to_get = key[key_selection]["keyid"]
             print(enc.gpg.export_keys(key_to_get))
@@ -34,6 +39,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             print("[red] select an option [/red]")
 
     if opt_number == 1:
+        # add public key
         real_name = prompt("name> ")
         name_comment = prompt("name comment> ")
         email = prompt("email> ")
@@ -48,6 +54,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         )
 
     if opt_number == 2:
+        # export public keys
         key: list[dict] = enc.get_all_keys()
         key_list = key_extractor(key)
         key_selection = show_key_menu(key_list)
@@ -56,21 +63,55 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             user_email = uid[0].split()[-1]
             key_to_get = key[key_selection]["keyid"]
             public_key_path = str(enc.export_folder)
-            with open(public_key_path + f"/{user_email}-public_key.txt", "w") as file:
+            with open(public_key_path + f"/{user_email}-public_key.enc", "w") as file:
                 file.write(enc.gpg.export_keys(key_to_get))
 
         except TypeError:
             print("[red] select an option [/red]")
 
     if opt_number == 3:
+        # delete key
         fingerprint = prompt("key fingerprint> ")
         enc.delete_key(fingerprint)
 
     # TODO: opt_number is revoke this is a placeholder code for temp import
     if opt_number == 4:
+        # revoke key
         public_key_path = str(enc.import_folder) + "/1.asc"
         enc.gpg.import_keys_file(public_key_path)
 
+
+    if opt_number == 5:
+        # import public key
+        public_keys = [
+            str(key).split("/")[-1]
+            for key in enc.import_folder.iterdir()
+            if key.is_file()
+        ]
+        key_selection = show_key_menu(public_keys)
+        if key_selection != None:
+            public_key_path = str(enc.import_folder) + f"/{public_keys[key_selection]}"
+            public_key= enc.gpg.import_keys_file(public_key_path)
+
+            if public_key.fingerprints[0]:
+                contact_name = prompt("contact name> ")
+                contact_email = prompt("contact email> ")
+                ContactDbController().add_contact(
+                    contact_name, contact_email, public_key.fingerprints[0]
+                )
+                print("[bold green] public key added to keyring [/bold green]")
+                # Todo: Trusting the key
+                print(public_key.fingerprints)
+
+# After import
+                subprocess.run([
+                    "gpg",
+                    "--homedir", str(enc.gpg.gnupghome),
+                    "--lsign-key", public_key.fingerprints[0]
+                ])
+
+        else:
+            print("[green]Please select [bold red]one file[/bold red] to import [/green]")
 
 # encryption
 
@@ -88,7 +129,6 @@ def key_management_handler(opt_number, enc: EncryptionManager):
 
 """
 def encryption_handler(opt_number: int, enc: EncryptionManager):
-    
     Todo:
 
         -- accept the input through the session
@@ -97,10 +137,9 @@ def encryption_handler(opt_number: int, enc: EncryptionManager):
         changelog:
             -- version 0.1.0
                 --- Create a prototype for encryption
-    session = PromptSession()
     if opt_number == 0:
-        plain_text = session.prompt("Message to encrypt> ")
-        recipient_email = session.prompt("Enter the recipient email> ")
+        plain_text =prompt("Message to encrypt> ")
+        recipient_email =prompt("Enter the recipient email> ")
 
         all_keys = enc.gpg.list_keys()
         for key in all_keys:
@@ -118,7 +157,7 @@ def encryption_handler(opt_number: int, enc: EncryptionManager):
                             print("[bold red]Encryption failed[/bold red]")
                             print(f"status: {encrypted_data.status}")
 
-                            trust = session.prompt("trust key> ")
+                            trust = prompt("trust key> ")
                             if trust == "y":
                                 enc.gpg.trust_keys(key_fingerprint, "TRUST_FULLY")
 
@@ -146,7 +185,7 @@ def convert_list(items: list[list[str]]) -> list:
 def convert_dict(items: list[str]) -> dict:
     update_field_dict = {}
     for item in items:
-        db_key = item.replace(" ","_")
+        db_key = item.replace(" ", "_")
         update_field_dict[db_key] = update_contact_form(item)
     return update_field_dict
 
@@ -182,7 +221,9 @@ def contacts_handler(opt_number: int):
             contact_fields = show_contact_fields()
             search_result = search_result[contact_selection]
             update_field_dict = convert_dict(contact_fields)
-            ContactDbController().update_contacts(search_result[0], update_fields=update_field_dict)
+            ContactDbController().update_contacts(
+                search_result[0], update_fields=update_field_dict
+            )
             print("[bold green] contact details have been changed [/bold green]")
         else:
             print("[bold red] No results found [/bold red]")
@@ -209,11 +250,12 @@ def render_sub_menus(selected_menu_option):
     if selected_menu_option == 0:
         selected_sub_menu_option = show_enc_km_menu()
         key_management_handler(selected_sub_menu_option, enc)
-    # if selected_menu_option == 1:
-    #     selected_sub_menu_option = show_enc_edt_menu()
-    #     encryption_handler(selected_sub_menu_option, enc)
-    # if selected_menu_option == 2:
-    #     pass
+    if selected_menu_option == 1:
+        selected_sub_menu_option = show_enc_edt_menu()
+        encryption_handler(selected_sub_menu_option, enc)
+    if selected_menu_option == 2:
+        selected_sub_menu_option = show_enc_edt_menu()
+        decryption_handler(selected_sub_menu_option,enc)
     if selected_menu_option == 3:
         selected_sub_menu_option = show_enc_contacts_menu()
         contacts_handler(selected_sub_menu_option)

@@ -131,7 +131,7 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS contacts (
                     contact_id TEXT PRIMARY KEY,
                     contact_name TEXT NOT NULL,
-                    contact_email TEXT NOT NULL UNIQUE,
+                    contact_email TEXT NOT NULL,
                     key_fingerprint TEXT NOT NULL,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP

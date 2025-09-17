@@ -7,6 +7,8 @@ class EncryptionManager:
         self.config_path: Path = Path("~/.safeparse/gpg").expanduser()
         self.export_folder: Path = Path("~/.safeparse/gpg/export_keys").expanduser()
         self.import_folder: Path = Path("~/.safeparse/gpg/import_keys").expanduser()
+        self.enc_folder: Path = Path("~/.safeparse/enc_folder").expanduser()
+        self.dec_folder: Path = Path("~/.safeparse/dec_folder").expanduser()
         self.username: str = username
         self.email: str = email
         self.key_type: str = "RSA"
@@ -17,6 +19,8 @@ class EncryptionManager:
         self.config_path.mkdir(parents=True, exist_ok=True)
         self.export_folder.mkdir(parents=True, exist_ok=True)
         self.import_folder.mkdir(parents=True, exist_ok=True)
+        self.enc_folder.mkdir(parents=True, exist_ok=True)
+        self.dec_folder.mkdir(parents=True, exist_ok=True)
 
     def init_encryption(self):
         self._create_config_folder()

@@ -157,6 +157,7 @@ def show_enc_km_menu():
         "export public key",
         "delete key",
         "revoke key",
+        "import public key",
     ]
 
     terminal_menu = TerminalMenu(opts, title="key management menu")
@@ -204,12 +205,24 @@ def show_key_menu(opts: list):
     key_selection = key_menu.show()
     return key_selection
 
+def show_file_to_encrypt_menu(opts: list):
+    key_menu = TerminalMenu(opts, title="Choose a file to encrypt")
+    key_selection = key_menu.show()
+    return key_selection
 
 # encryption + contact display/selection
 def show_available_contacts(opts: list):
     key_menu = TerminalMenu(opts, title="select the contact")
     key_selection = key_menu.show()
     return key_selection
+
+
+def show_available_trust_level():
+    opts = ["full","never","expired"]
+    key_menu = TerminalMenu(opts, title="Enter a trust level for the imported key")
+    key_selection = key_menu.show()
+    return key_selection
+
 
 def show_contact_fields():
     opts = [
@@ -219,4 +232,3 @@ def show_contact_fields():
     ]
     selected_opts = select_multiple(opts, tick_character="*", minimal_count=1)
     return selected_opts
-
