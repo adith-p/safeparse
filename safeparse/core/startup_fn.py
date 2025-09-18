@@ -89,7 +89,8 @@ def init_db():
                         username TEXT NOT NULL UNIQUE,
                         email TEXT NOT NULL UNIQUE,
                         master_password_hash BLOB NOT NULL,
-                        master_password_salt BLOB NOT NULL
+                        master_password_salt BLOB NOT NULL,
+                        key_fingerprint text NOT NULL
                     );
                     """
                 )
@@ -102,7 +103,7 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS user_passwords (
                     password_id TEXT PRIMARY KEY,
                     login_username TEXT,
-                    notes TEXT,        
+                    notes TEXT,
                     password TEXT,
                     user_id TEXT NOT NULL,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

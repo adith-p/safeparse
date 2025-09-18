@@ -52,8 +52,9 @@ class UserDbController(Db_controller):
         email: str,
         hashed_password: bytes,
         hash_salt: bytes,
+        key_fingerprint: str
     ):
-        query = "INSERT INTO users(user_id, username, email, master_password_hash, master_password_salt) VALUES (?, ?, ?,?, ?);"
+        query = "INSERT INTO users(user_id, username, email, master_password_hash, master_password_salt, key_fingerprint) VALUES (?, ?, ?,?, ?, ?);"
         self._execute(
             query,
             (
@@ -62,6 +63,7 @@ class UserDbController(Db_controller):
                 email,
                 hashed_password,
                 hash_salt,
+                key_fingerprint
             ),
             commit=True,
         )
@@ -91,6 +93,15 @@ class UserDbController(Db_controller):
                 password_hash,
             ),
             commit=True,
+        )
+    def get_key_fingerprint(self, user_id: str):
+        query = "SELECT key_fingerprint FROM users WHERE user_id = ?";
+        return self._execute(
+            query,
+            (
+                user_id,
+            ),
+            fetchone=True
         )
 
 

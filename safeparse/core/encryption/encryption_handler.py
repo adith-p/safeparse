@@ -106,13 +106,15 @@ def decryption_handler(opt_number: int, enc: EncryptionManager):
             # file_to_encrypt = str(enc.dec_folder) + f"/{str(file_to_encrypt)}"
             full_path: Path = enc.dec_folder / file_to_encrypt
         full_path = Path(full_path)
+        output_path = f"{str(full_path)}_decrypt"
         if not full_path.exists():
             print("[bold red] file to decrypt does not exists [/bold red]")
             return
+        
         with full_path.open("rb") as f:
             result = enc.gpg.decrypt_file(
                 f,
-                output=str(full_path)
+                output=str(output_path)
             )
 
         print(f"decryption status: {result.status}")

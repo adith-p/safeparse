@@ -155,9 +155,9 @@ def show_enc_km_menu():
         "list public keys",
         "generate new key-pairs",
         "export public key",
+        "import public key",
         "delete key",
         "revoke key",
-        "import public key",
     ]
 
     terminal_menu = TerminalMenu(opts, title="key management menu")
@@ -200,7 +200,7 @@ def show_key_length_menu():
     return terminal_enc
 
 
-def show_key_menu(opts: list):
+def show_key_menu(opts):
     key_menu = TerminalMenu(opts, title="Select the public/private key")
     key_selection = key_menu.show()
     return key_selection
