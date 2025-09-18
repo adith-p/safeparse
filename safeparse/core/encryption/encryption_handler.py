@@ -1,9 +1,14 @@
+from os import path
 from gnupg import Crypt
 from prompt_toolkit import prompt
 from .EncryptionManager import EncryptionManager
 from safeparse.db.controllers import ContactDbController
-from safeparse.utils.menu_utils import show_available_contacts, show_file_to_encrypt_menu
+from safeparse.utils.menu_utils import (
+    show_available_contacts,
+    show_file_to_encrypt_menu,
+)
 from rich import print
+from pathlib import Path
 
 
 def convert_list(items: list[list[str]]) -> list:
@@ -13,7 +18,7 @@ def convert_list(items: list[list[str]]) -> list:
     return search_list
 
 
-def encryption_handler(opt_number: int, enc:EncryptionManager):
+def encryption_handler(opt_number: int, enc: EncryptionManager):
     # recipent is required for both cases.
     recipient = prompt("search> ")
     if recipient.strip() == "":
@@ -36,9 +41,9 @@ def encryption_handler(opt_number: int, enc:EncryptionManager):
             return
 
         # encrypt messages
-        encrypted_data: Crypt= enc.gpg.encrypt(message_to_encrypt,recipients=fingerprint)
-
-
+        encrypted_data: Crypt = enc.gpg.encrypt(
+            message_to_encrypt, recipients=fingerprint
+        )
 
         if not encrypted_data.ok:
             print("[bold red]Encryption failed[/bold red]")
@@ -51,33 +56,65 @@ def encryption_handler(opt_number: int, enc:EncryptionManager):
             print(encrypted_text)
 
     if opt_number == 1:
-        file_to_encrypt = prompt("enter the path of file> ")
-        if file_to_encrypt.strip() == "":
+        full_path = prompt("enter the path of file> ")
+        if full_path.strip() == "":
 
-            file_to_encrypt_list = [ str(file).split("/")[-1] for file in enc.enc_folder.iterdir() if file.is_file()]
+            file_to_encrypt_list = [
+                str(file).split("/")[-1]
+                for file in enc.enc_folder.iterdir()
+                if file.is_file()
+            ]
             key_selection = show_file_to_encrypt_menu(file_to_encrypt_list)
             file_to_encrypt = file_to_encrypt_list[key_selection]
-            file_to_encrypt = str(enc.enc_folder) + f"/{str(file_to_encrypt)}"
+            # file_to_encrypt = str(enc.enc_folder) + f"/{str(file_to_encrypt)}"
+            full_path = enc.enc_folder / file_to_encrypt
+        full_path = Path(full_path)
+        if not full_path.exists():
+            print("[bold red] file to encrypt does not exists [/bold red]")
+            return
 
-        enc.gpg.encrypt_file(file_to_encrypt,recipients=fingerprint,sign=True)
+        with full_path.open("rb") as f:
+            result = enc.gpg.encrypt_file(
+                f,
+                recipients=fingerprint,
+                sign=True,
+                output=f"{full_path}.gpg",
+            )
+
+        print(f"decryption status: {result.status}")
+        if not result.ok:
+            print(f"decryption error: {result.stderr}")
 
 
-
-def decryption_handler(opt_number: int, enc:EncryptionManager):
+def decryption_handler(opt_number: int, enc: EncryptionManager):
     if opt_number == 0:
         secret_message = prompt("message> ")
         message = enc.gpg.decrypt(message=secret_message)
         print(message)
 
     if opt_number == 1:
-        file_to_encrypt = prompt("enter the path of file> ")
-        if file_to_encrypt.strip() == "":
+        full_path = prompt("enter the path of file> ")
+        if full_path.strip() == "":
 
-            file_to_encrypt_list = [ str(file).split("/")[-1] for file in enc.enc_folder.iterdir() if file.is_file()]
+            file_to_encrypt_list = [
+                str(file).split("/")[-1]
+                for file in enc.dec_folder.iterdir()
+                if file.is_file()
+            ]
             key_selection = show_file_to_encrypt_menu(file_to_encrypt_list)
             file_to_encrypt = file_to_encrypt_list[key_selection]
-            file_to_encrypt = str(enc.enc_folder) + f"/{str(file_to_encrypt)}"
+            # file_to_encrypt = str(enc.dec_folder) + f"/{str(file_to_encrypt)}"
+            full_path: Path = enc.dec_folder / file_to_encrypt
+        full_path = Path(full_path)
+        if not full_path.exists():
+            print("[bold red] file to decrypt does not exists [/bold red]")
+            return
+        with full_path.open("rb") as f:
+            result = enc.gpg.decrypt_file(
+                f,
+                output=str(full_path)
+            )
 
-        enc.gpg.decrypt_file(file_to_encrypt)
-
-
+        print(f"decryption status: {result.status}")
+        if not result.ok:
+            print(f"decryption error: {result.stderr}")

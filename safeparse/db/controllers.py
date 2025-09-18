@@ -9,8 +9,6 @@ from typing import Any, Optional, Tuple
 from safeparse.setting import VAULT_DB
 
 
-
-
 class Db_controller:
     def __init__(self):
         self.db_name = VAULT_DB
@@ -189,9 +187,9 @@ class ContactDbController(Db_controller):
                 contact_name,
                 contact_email,
                 fingerprint,
-                ),
-                commit=True,
-            )
+            ),
+            commit=True,
+        )
 
     def update_contacts(self, contact_id: str, update_fields: dict):
         if not update_fields:

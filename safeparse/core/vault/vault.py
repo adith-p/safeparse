@@ -28,6 +28,7 @@ def put_paw(current_usr_id: str) -> list:
     )
     return result
 
+
 def delete_paw():
     session = PromptSession()
     pass_id = session.prompt("Enter the password id > ")

@@ -27,6 +27,7 @@ def request_password_id():
     password_id = session.prompt("password id > ")
     return password_id
 
+
 def update_psw_form(attribute: str) -> tuple[str, str]:
     session = PromptSession()
     attribute_prompt = session.prompt(f"{attribute} > ")

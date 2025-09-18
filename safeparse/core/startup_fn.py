@@ -13,7 +13,6 @@ from safeparse.setting import VAULT_DB
 DB_FILE = VAULT_DB
 
 
-
 def does_schema_exist(curr):
     """
     Checks if the 'users' table exists in the database.

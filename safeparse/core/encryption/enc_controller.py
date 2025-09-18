@@ -8,22 +8,26 @@ from safeparse.utils.menu_utils import (
     show_key_menu,
     show_available_contacts,
     show_contact_fields,
-    show_enc_edt_menu
+    show_enc_edt_menu,
 )
 from rich import print
 from safeparse.core.users.user_auth import user_request
 from safeparse.db.controllers import ContactDbController
 from safeparse.core.vault.display_tables import display_tables_contact
 from prompt_toolkit import prompt
-from safeparse.core.encryption.encryption_handler import decryption_handler, encryption_handler
+from safeparse.core.encryption.encryption_handler import (
+    decryption_handler,
+    encryption_handler,
+)
 
 
 def key_extractor(key: list[dict]):
     key_id_list = []
     for items in key:
-        key_id_list.append(items["keyid"])
+        key_id_list.append(f"{items["keyid"]} {items["uids"][0]}")
 
     return key_id_list
+
 
 def key_management_handler(opt_number, enc: EncryptionManager):
     if opt_number == 0:
@@ -31,7 +35,6 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         key: list[dict] = enc.get_all_keys()
         key_list = key_extractor(key)
         key_selection = show_key_menu(key_list)
-        print(key)
         try:
             key_to_get = key[key_selection]["keyid"]
             print(enc.gpg.export_keys(key_to_get))
@@ -80,7 +83,6 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         public_key_path = str(enc.import_folder) + "/1.asc"
         enc.gpg.import_keys_file(public_key_path)
 
-
     if opt_number == 5:
         # import public key
         public_keys = [
@@ -91,7 +93,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         key_selection = show_key_menu(public_keys)
         if key_selection != None:
             public_key_path = str(enc.import_folder) + f"/{public_keys[key_selection]}"
-            public_key= enc.gpg.import_keys_file(public_key_path)
+            public_key = enc.gpg.import_keys_file(public_key_path)
 
             if public_key.fingerprints[0]:
                 contact_name = prompt("contact name> ")
@@ -103,15 +105,22 @@ def key_management_handler(opt_number, enc: EncryptionManager):
                 # Todo: Trusting the key
                 print(public_key.fingerprints)
 
-# After import
-                subprocess.run([
-                    "gpg",
-                    "--homedir", str(enc.gpg.gnupghome),
-                    "--lsign-key", public_key.fingerprints[0]
-                ])
+                # After import
+                subprocess.run(
+                    [
+                        "gpg",
+                        "--homedir",
+                        str(enc.gpg.gnupghome),
+                        "--lsign-key",
+                        public_key.fingerprints[0],
+                    ]
+                )
 
         else:
-            print("[green]Please select [bold red]one file[/bold red] to import [/green]")
+            print(
+                "[green]Please select [bold red]one file[/bold red] to import [/green]"
+            )
+
 
 # encryption
 
@@ -255,7 +264,7 @@ def render_sub_menus(selected_menu_option):
         encryption_handler(selected_sub_menu_option, enc)
     if selected_menu_option == 2:
         selected_sub_menu_option = show_enc_edt_menu()
-        decryption_handler(selected_sub_menu_option,enc)
+        decryption_handler(selected_sub_menu_option, enc)
     if selected_menu_option == 3:
         selected_sub_menu_option = show_enc_contacts_menu()
         contacts_handler(selected_sub_menu_option)
