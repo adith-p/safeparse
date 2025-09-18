@@ -110,13 +110,13 @@ def create_user():
 
     psw_hash, password_salt = hash_password(password)
     user_id = str(uuid4())
-    UserDbController().create_user(user_id, username, email, psw_hash, password_salt)
     
 
     enc = EncryptionManager(username=username, email=email)
     enc.init_encryption()
     keys = enc.create_keys(password=password)
     
+    UserDbController().create_user(user_id, username, email, psw_hash, password_salt, keys.fingerprint)
     ContactDbController().add_contact(username,email,keys.fingerprint)
     #contact_db().add_contact(username,email,fingerprint)
 

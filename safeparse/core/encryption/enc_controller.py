@@ -1,4 +1,6 @@
+from enum import verify
 import subprocess
+from beaupy import confirm
 from gnupg import Crypt
 from .EncryptionManager import EncryptionManager
 from safeparse.utils.menu_utils import (
@@ -11,14 +13,15 @@ from safeparse.utils.menu_utils import (
     show_enc_edt_menu,
 )
 from rich import print
-from safeparse.core.users.user_auth import user_request
-from safeparse.db.controllers import ContactDbController
+from safeparse.core.users.user_auth import user_request, verify_password
+from safeparse.db.controllers import ContactDbController, UserDbController
 from safeparse.core.vault.display_tables import display_tables_contact
 from prompt_toolkit import prompt
 from safeparse.core.encryption.encryption_handler import (
     decryption_handler,
     encryption_handler,
 )
+from getpass import getpass
 
 
 def key_extractor(key: list[dict]):
@@ -33,7 +36,6 @@ def key_management_handler(opt_number, enc: EncryptionManager):
     if opt_number == 0:
         # list all public keys
         key: list[dict] = enc.get_all_keys()
-        print(key)
         key_list = key_extractor(key)
         key_selection = show_key_menu(key_list)
         try:
@@ -75,8 +77,28 @@ def key_management_handler(opt_number, enc: EncryptionManager):
 
     if opt_number == 3:
         # delete key
-        fingerprint = prompt("key fingerprint> ")
-        enc.delete_key(fingerprint)
+        public_keys = enc.gpg.list_keys()
+        if public_keys:
+            public_key = key_extractor(public_keys)
+            selected_key = public_keys[show_key_menu(public_key)]
+            if confirm("proceed with deletion"):
+                password = getpass("Enter password to confirm> ").strip()
+                if not password:
+                    print("password cannot be empty")
+                master_hash_pass = UserDbController().get_passhash(user_request["user_id"])
+                if selected_key['fingerprint'] == UserDbController().get_key_fingerprint(user_request["user_id"]):
+                    print("can't delete this key")
+                    return
+                if verify_password(password, master_hash_pass):
+                    deleted_key = enc.delete_key(selected_key["fingerprint"])
+                    if deleted_key.ok:
+                        print("Key deleted successfully...")
+                    else:
+                        print(f"Errors: {deleted_key.stderr}")
+
+                return
+            return
+
 
     # TODO: opt_number is revoke this is a placeholder code for temp import
     if opt_number == 4:

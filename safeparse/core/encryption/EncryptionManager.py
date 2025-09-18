@@ -64,5 +64,4 @@ class EncryptionManager:
         enc = self.gpg
 
     def delete_key(self, fingerprint):
-        self.delete_key(fingerprint)
-        print("[bold green] Key deleted [/bold green]")
+        return self.delete_key(fingerprint)
