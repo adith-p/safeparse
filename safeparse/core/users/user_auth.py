@@ -8,7 +8,7 @@ import bcrypt
 from getpass import getpass
 from uuid import uuid4
 
-from safeparse.db.controllers import UserDbController
+from safeparse.db.controllers import ContactDbController, UserDbController
 from safeparse.logging.logger import logger
 
 from safeparse.core.encryption.EncryptionManager import EncryptionManager
@@ -86,6 +86,7 @@ def authenticate(username, password) -> bool:
 def create_user():
 
     db = UserDbController()
+    contact_db =ContactDbController()
     session = PromptSession()
 
     # Check if user already exists
@@ -110,10 +111,14 @@ def create_user():
     psw_hash, password_salt = hash_password(password)
     user_id = str(uuid4())
     UserDbController().create_user(user_id, username, email, psw_hash, password_salt)
+    
 
     enc = EncryptionManager(username=username, email=email)
     enc.init_encryption()
-    enc.create_keys(password=password)
+    keys = enc.create_keys(password=password)
+    
+    ContactDbController().add_contact(username,email,keys.fingerprint)
+    #contact_db().add_contact(username,email,fingerprint)
 
     return True, username
 

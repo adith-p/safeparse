@@ -36,7 +36,7 @@ class EncryptionManager:
             key_length=self.key_length,
             name_real=self.username,
         )
-        self.gpg.gen_key(key_input)
+        return self.gpg.gen_key(key_input)
 
     def get_all_keys(self):
         return self.gpg.list_keys()

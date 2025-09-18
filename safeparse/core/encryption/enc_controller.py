@@ -33,6 +33,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
     if opt_number == 0:
         # list all public keys
         key: list[dict] = enc.get_all_keys()
+        print(key)
         key_list = key_extractor(key)
         key_selection = show_key_menu(key_list)
         try:
