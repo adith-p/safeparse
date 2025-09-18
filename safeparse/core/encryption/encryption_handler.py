@@ -1,4 +1,3 @@
-from os import path
 from gnupg import Crypt
 from prompt_toolkit import prompt
 from .EncryptionManager import EncryptionManager

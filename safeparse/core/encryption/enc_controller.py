@@ -22,7 +22,7 @@ from safeparse.core.encryption.encryption_handler import (
     encryption_handler,
 )
 from getpass import getpass
-
+from safeparse.logging.logger import logger
 
 def key_extractor(key: list[dict]):
     key_id_list = []
@@ -43,13 +43,13 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             print(enc.gpg.export_keys(key_to_get))
         except TypeError:
             print("[red] select an option [/red]")
-
+        logger.info("keyring viewed")
     if opt_number == 1:
         # add public key
         real_name = prompt("name> ")
         name_comment = prompt("name comment> ")
         email = prompt("email> ")
-        passphrase = prompt("password> ")
+        passphrase =getpass("password> ")
         gpg_user_id = f"{real_name} <{email}>"
 
         enc.custom_create_keys(
@@ -58,6 +58,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             name_comment=name_comment,
             name_email=gpg_user_id,
         )
+        logger.info("public key added")
 
     if opt_number == 2:
         # export public keys
@@ -71,42 +72,11 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             public_key_path = str(enc.export_folder)
             with open(public_key_path + f"/{user_email}-public_key.enc", "w") as file:
                 file.write(enc.gpg.export_keys(key_to_get))
-
+            logger.info("public key exported")
         except TypeError:
             print("[red] select an option [/red]")
 
     if opt_number == 3:
-        # delete key
-        public_keys = enc.gpg.list_keys()
-        if public_keys:
-            public_key = key_extractor(public_keys)
-            selected_key = public_keys[show_key_menu(public_key)]
-            if confirm("proceed with deletion"):
-                password = getpass("Enter password to confirm> ").strip()
-                if not password:
-                    print("password cannot be empty")
-                master_hash_pass = UserDbController().get_passhash(user_request["user_id"])
-                if selected_key['fingerprint'] == UserDbController().get_key_fingerprint(user_request["user_id"]):
-                    print("can't delete this key")
-                    return
-                if verify_password(password, master_hash_pass):
-                    deleted_key = enc.delete_key(selected_key["fingerprint"])
-                    if deleted_key.ok:
-                        print("Key deleted successfully...")
-                    else:
-                        print(f"Errors: {deleted_key.stderr}")
-
-                return
-            return
-
-
-    # TODO: opt_number is revoke this is a placeholder code for temp import
-    if opt_number == 4:
-        # revoke key
-        public_key_path = str(enc.import_folder) + "/1.asc"
-        enc.gpg.import_keys_file(public_key_path)
-
-    if opt_number == 5:
         # import public key
         public_keys = [
             str(key).split("/")[-1]
@@ -143,64 +113,50 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             print(
                 "[green]Please select [bold red]one file[/bold red] to import [/green]"
             )
+    
+    if opt_number == 4:
+        all_keys = enc.get_all_keys()
+        if not all_keys:
+            print("No public key in the keyring")
+
+        key_info_for_menu = key_extractor(all_keys)
+        key_selection = show_key_menu(key_info_for_menu)
+        selected_key = all_keys[key_selection]
+
+        if not confirm(f"You are about to delete the key for {selected_key['uids'][0]}. Proceed?"):
+            print("Deletion cancelled.")
+            return
+        db = UserDbController()
+        user_primary_fingerprint = db.get_key_fingerprint(user_request["user_id"])
+
+        if selected_key['fingerprint'] == user_primary_fingerprint[0]:
+            print("[bold red]Error:[/bold red] You cannot delete the primary key associated with your account.")
+            return
+
+        password = getpass(f"Enter key password for {selected_key['uids'][0]} to confirm deletion> ").strip()
+        if not password:
+            print("Password cannot be empty. Deletion cancelled.")
+            return
+
+        master_hash_tuple = db.get_passhash(user_request["user_id"])
+        if not master_hash_tuple:
+            print("[bold red]Fatal Error:[/bold red] Could not retrieve user authentication hash from the database.")
+            return
+
+        if not verify_password(password, master_hash_tuple[0]):
+            print("Incorrect password. Deletion cancelled.")
+            return
+
+        print(f"Attempting to delete key with fingerprint: {selected_key['fingerprint']}...")
+        deletion_result = enc.delete_key(selected_key["fingerprint"],password)
 
 
-# encryption
 
+    # TODO: opt_number is revoke this is a placeholder code for temp import
+    if opt_number == 5:
+        # revoke keys
+        enc.revoke_key()
 
-# def encryption_handler(opt_number: int, enc: EncryptionManager):
-#     contact_list = []
-#     contacts = ContactDbController().get_all_contacts()
-#     contact_list.append(ContactDbController().get_all_contacts())
-#     contact_completer = WordCompleter(contact_list)
-#     if opt_number == 0:
-#         message_prompt = prompt("Message to encrypt> ")
-#         contact_prompt = prompt("recipient> ", completer=contact_completer)
-#         print(contact_prompt)
-#
-
-"""
-def encryption_handler(opt_number: int, enc: EncryptionManager):
-    Todo:
-
-        -- accept the input through the session
-        -- encrypt the session input to ciper text and txt file
-
-        changelog:
-            -- version 0.1.0
-                --- Create a prototype for encryption
-    if opt_number == 0:
-        plain_text =prompt("Message to encrypt> ")
-        recipient_email =prompt("Enter the recipient email> ")
-
-        all_keys = enc.gpg.list_keys()
-        for key in all_keys:
-            for uid in key["uids"]:
-                print(uid)
-                if recipient_email in uid:
-                    print("in recipient email")
-                    if key_fingerprint := key["fingerprint"]:
-                        print(key)
-                        encrypted_data: Crypt = enc.gpg.encrypt(
-                            data=plain_text, recipients=key_fingerprint
-                        )
-
-                        if not encrypted_data.ok:
-                            print("[bold red]Encryption failed[/bold red]")
-                            print(f"status: {encrypted_data.status}")
-
-                            trust = prompt("trust key> ")
-                            if trust == "y":
-                                enc.gpg.trust_keys(key_fingerprint, "TRUST_FULLY")
-
-                        else:
-                            encrypted_text = str(encrypted_data)
-                            print("Encryption successful!")
-                            print("\nEncrypted Message (ASCII Armor):\n")
-                            print(encrypted_text)
-                else:
-                    print(f"Key for {recipient_email} not found.")
-"""
 
 
 def update_contact_form(attribute: str) -> str:

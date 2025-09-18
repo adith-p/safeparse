@@ -11,6 +11,7 @@ from safeparse.utils.menu_utils import (
     show_password_storage_menu,
     show_password_type_menu,
     update_password_menu,
+    show_avail_passwords,
 )
 
 from safeparse.core.users.user_auth import (
@@ -26,10 +27,16 @@ from safeparse.core.users.user import user_command
 from beaupy import ValidationError
 
 from safeparse.core.vault import vault
-from safeparse.core.vault.display_tables import display_tables
+from safeparse.core.vault.display_tables import display_tables,cipher_display_tables
 
 from safeparse.logging.logger import logger, print_log
 
+
+def menu_list(items):
+    menu_entry = []
+    for item in items:
+        menu_entry.append(f"{item[0]} {item[1]}")
+    return menu_entry
 
 def dispatch(raw_string):
     session = PromptSession()
@@ -87,8 +94,17 @@ def dispatch(raw_string):
             storage_action = show_password_storage_menu()
             # View passwords
             if storage_action == 0:
-                result = vault.get_psw(current_user_id)
-                display_tables(result)
+                saved_passwords = vault.get_psw(current_user_id)
+                cipher_display_tables(saved_passwords)
+
+                psw_list = menu_list(saved_passwords)
+                selected_password = show_avail_passwords(psw_list)
+                password_entry = saved_passwords[selected_password]
+                result = vault.view_psw(password_entry)
+                mutable_password_entry = list(password_entry)
+                mutable_password_entry[2] = str(result) 
+                print(mutable_password_entry)
+                display_tables([mutable_password_entry])
                 logger.info(
                     "User (id: %s) is viewed passwords from the vault.", current_user_id
                 )
@@ -100,18 +116,26 @@ def dispatch(raw_string):
 
             # Update passwords
             if storage_action == 2:
-                saved_password = vault.get_psw(current_user_id)
-                display_tables(saved_password)
-                session = PromptSession()
-                pass_id = session.prompt("Enter the password id > ")
-                # custom_field = update_password_menu()
-                vault.update_password(pass_id, update_password_menu())
+                saved_passwords = vault.get_psw(current_user_id)
+                if not saved_passwords:
+                    print("vault is empty")
+                    return
+                display_tables(saved_passwords)
+                psw_list = menu_list(saved_passwords)
+                selected_password = show_avail_passwords(psw_list)
+                psw_id = saved_passwords[selected_password][0]
+                vault.update_password(psw_id, update_password_menu())
 
             # Delete Password
             if storage_action == 3:
                 saved_passwords = vault.get_psw(current_user_id)
+                if not saved_passwords:
+                    print("vault is empty")
                 display_tables(saved_passwords)
-                vault.delete_paw()
+                psw_list = menu_list(saved_passwords)
+                selected_password = show_avail_passwords(psw_list)
+                psw_id = saved_passwords[selected_password][0]
+                vault.delete_paw(psw_id)
 
         # Option 2: Printing the log files
         if opt == 2:

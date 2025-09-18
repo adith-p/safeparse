@@ -143,6 +143,8 @@ def auth_command(parser):
 
     if parser.auth_command == "user":
         login_object = login()
+        if not login_object:
+            return
         if login_object[0]:
             print("[green] user authenticated [/green]")
             logger.info("Authentication successful for user: '%s'", login_object[1])

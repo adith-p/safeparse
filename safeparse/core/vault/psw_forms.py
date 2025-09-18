@@ -1,13 +1,15 @@
-from typing import Any
-
+from rich import print
 from prompt_toolkit import PromptSession
 
 
-def get_psw_form() -> tuple[str, str, str]:
+def get_psw_form() -> tuple[str, str, str] | None:
     session = PromptSession()
-    password = session.prompt("password > ")
-    username = session.prompt("username > ")
-    note = session.prompt("Note > ")
+    password = session.prompt("password > ").strip()
+    username = session.prompt("username > ").strip()
+    note = session.prompt("Note > ").strip()
+    if note == "" or username == "" or password == "":
+        print("[bold green]username, password or note can't be empty[/bold green]")
+        return None
     return (
         password,
         username,

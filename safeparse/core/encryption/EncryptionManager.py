@@ -60,8 +60,16 @@ class EncryptionManager:
         )
         self.gpg.gen_key(key_input)
 
-    def revoke_key(self):
-        enc = self.gpg
 
-    def delete_key(self, fingerprint):
-        return self.delete_key(fingerprint)
+    def delete_key(self, fingerprint,password):
+        status = self.gpg.delete_keys(fingerprint,secret=True,passphrase=password)
+        status = self.gpg.delete_keys(fingerprint)
+        print(status)
+
+    def encrypt_password(self, fingerprint,password):
+        encrypted_password = self.gpg.encrypt(password,recipients=fingerprint)
+        return encrypted_password
+
+    def decrypt_password(self, encrypted_password):
+        decrypted_passwords = self.gpg.decrypt(encrypted_password)
+        return decrypted_passwords
