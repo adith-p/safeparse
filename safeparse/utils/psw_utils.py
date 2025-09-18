@@ -9,7 +9,7 @@ def gen_password(
     use_upper: bool = True,
     use_digit: bool = True,
     use_special: bool = True,
-    custom_list: list = None,
+    custom_list: list | None = None,
 ):
     """
     Generate a secure random password based on selected character types.

@@ -2,12 +2,12 @@ from prompt_toolkit import PromptSession
 from rich import print
 
 
-from dispatcher import dispatch
+from safeparse.core.dispatcher import dispatch
 
 
-from utils.startup_fn import init_db
-from utils.users.user_auth import create_user, is_authenticated
-from utils.event_logging.logger import logger
+from safeparse.core.startup_fn import init_db
+from safeparse.core.users.user_auth import create_user, is_authenticated
+from safeparse.logging.logger import logger
 
 
 # Interactive loop

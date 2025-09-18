@@ -1,14 +1,16 @@
 import sqlite3
 import time
 
+
 from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
-from utils.event_logging.logger import logger
+from safeparse.logging.logger import logger
+from safeparse.setting import VAULT_DB
 
 
-DB_FILE = "vault.db"
+DB_FILE = VAULT_DB
 
 
 def does_schema_exist(curr):
@@ -85,8 +87,10 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS users (
                         user_id TEXT PRIMARY KEY,
                         username TEXT NOT NULL UNIQUE,
+                        email TEXT NOT NULL UNIQUE,
                         master_password_hash BLOB NOT NULL,
-                        master_password_salt BLOB NOT NULL
+                        master_password_salt BLOB NOT NULL,
+                        key_fingerprint text NOT NULL
                     );
                     """
                 )
@@ -99,7 +103,7 @@ def init_db():
                     CREATE TABLE IF NOT EXISTS user_passwords (
                     password_id TEXT PRIMARY KEY,
                     login_username TEXT,
-                    notes TEXT,        
+                    notes TEXT,
                     password TEXT,
                     user_id TEXT NOT NULL,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -121,6 +125,33 @@ def init_db():
 
                     """
                 )
+
+                curr.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS contacts (
+                    contact_id TEXT PRIMARY KEY,
+                    contact_name TEXT NOT NULL,
+                    contact_email TEXT NOT NULL,
+                    key_fingerprint TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """
+                )
+                curr.execute(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS set_contact_timestamp
+                    AFTER UPDATE ON contacts
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE contacts
+                        SET updated_at = CURRENT_TIMESTAMP
+                        WHERE contact_id = OLD.contact_id;
+                    END;
+
+                    """
+                )
+                conn.commit()
                 conn.commit()
                 print("'users' table created successfully.")
                 logger.info("user related table created successfully.")

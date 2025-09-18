@@ -8,19 +8,23 @@ import bcrypt
 from getpass import getpass
 from uuid import uuid4
 
-from utils.database_controllers import UserDbController
-from utils.event_logging.logger import logger
+from safeparse.db.controllers import ContactDbController, UserDbController
+from safeparse.logging.logger import logger
+
+from safeparse.core.encryption.EncryptionManager import EncryptionManager
 
 
-class UserReuest(TypedDict):
+class UserRequest(TypedDict):
     username: str | None
+    email: str | None
     user_id: str | None
     is_authenticated: bool
 
 
-user_request: UserReuest = {
+user_request: UserRequest = {
     "username": None,
     "user_id": None,
+    "email": None,
     "is_authenticated": False,
 }
 
@@ -65,13 +69,11 @@ def authenticate(username, password) -> bool:
         return False
 
     if user_data[1] == username:
-
-        hashed_password = password_hash(password=password, salt=user_data[3])
-        if verify_password(password, hashed_password):
+        if verify_password(psw=password, hashed_psw=user_data[3]):
             user_request["is_authenticated"] = True
             user_request["username"] = username
             user_request["user_id"] = user_data[0]
-
+            user_request["email"] = user_data[2]
             return True
         print("[red] password or username is incorrect [/red]")
     # except Exception:
@@ -84,6 +86,7 @@ def authenticate(username, password) -> bool:
 def create_user():
 
     db = UserDbController()
+    contact_db =ContactDbController()
     session = PromptSession()
 
     # Check if user already exists
@@ -96,16 +99,26 @@ def create_user():
         print("[red] username can't be empty [/red]")
         return False
 
+    email = session.prompt("Enter Email > ").strip()
+    if not email:
+        print("[red] Email can't be empty [/red]")
+
     password = getpass("Password > ").strip()
     if not password:
-        print("['red']Password cannot be empty.['/red']")
+        print("[red]Password cannot be empty.[/red]")
         return False
 
     psw_hash, password_salt = hash_password(password)
     user_id = str(uuid4())
-    curr = UserDbController().create_user(
-        user_id, username, psw_hash, password_salt
-    )
+    
+
+    enc = EncryptionManager(username=username, email=email)
+    enc.init_encryption()
+    keys = enc.create_keys(password=password)
+    
+    UserDbController().create_user(user_id, username, email, psw_hash, password_salt, keys.fingerprint)
+    ContactDbController().add_contact(username,email,keys.fingerprint)
+    #contact_db().add_contact(username,email,fingerprint)
 
     return True, username
 
@@ -130,6 +143,8 @@ def auth_command(parser):
 
     if parser.auth_command == "user":
         login_object = login()
+        if not login_object:
+            return
         if login_object[0]:
             print("[green] user authenticated [/green]")
             logger.info("Authentication successful for user: '%s'", login_object[1])

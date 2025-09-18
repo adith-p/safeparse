@@ -1,5 +1,5 @@
 from simple_term_menu import TerminalMenu
-from beaupy import confirm, prompt, select, select_multiple
+from beaupy import prompt, select_multiple
 
 
 # added docstring using AI and refactored it, so that is why this is very distinct from other files
@@ -15,7 +15,13 @@ def show_main_menu():
              1: view/save passwords
              2: quit
     """
-    opts = ["generate password", "view/save passwords", "view log", "quit"]
+    opts = [
+        "Generate password",
+        "Manage passwords",
+        "View logs",
+        "Encryption",
+        "Quit",
+    ]
     terminal_menu = TerminalMenu(opts, title="Main Menu")
     menu_entry = terminal_menu.show()
     return menu_entry
@@ -105,15 +111,15 @@ def show_password_storage_menu():
 def update_password_menu():
     """Displays the password update menu.
 
-        This menu allows the user to choose which field of a saved password
-        entry they want to update.
+    This menu allows the user to choose which field of a saved password
+    entry they want to update.
 
-        Returns:
-            int: The index of the selected menu item.
-                 0: username
-                 1: notes
-                 2: password
-                 3: quit
+    Returns:
+        int: The index of the selected menu item.
+             0: username
+             1: notes
+             2: password
+             3: quit
     """
     opts = [
         "login_username",
@@ -128,3 +134,108 @@ def update_password_menu():
         # title="Select character types to include:",
     )
     return selected_opts
+
+
+def show_enc_menu():
+    opts = [
+        "Key management",
+        "Encrypt Things",
+        "decrypt things",
+        "contacts",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="Encryption functionalities")
+    terminal_enc = terminal_menu.show()
+
+    return terminal_enc
+
+
+def show_enc_km_menu():
+    opts = [
+        "list public keys",
+        "generate new key-pairs",
+        "export public key",
+        "import public key",
+        "delete key",
+        "revoke key",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="key management menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_enc_edt_menu() -> int:
+    opts = [
+        "text messages",
+        "files",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="encryption and decryption menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_enc_contacts_menu() -> int:
+    opts = [
+        "view contacts",
+        "add contacts",
+        "update contacts",
+        "delete contacts",
+    ]
+
+    terminal_menu = TerminalMenu(opts, title="contact menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_key_length_menu():
+    opts = [
+        "RSA, 4096 bits (Recommended)",
+        "RSA, 2048 bits (Good for compatibility)",
+        "ECC (Elliptic Curve Cryptography)",
+    ]
+    terminal_menu = TerminalMenu(opts, title="key type and size menu")
+    terminal_enc = terminal_menu.show()
+    return terminal_enc
+
+
+def show_key_menu(opts):
+    key_menu = TerminalMenu(opts, title="Select the public/private key")
+    key_selection = key_menu.show()
+    return key_selection
+
+
+def show_file_to_encrypt_menu(opts: list):
+    key_menu = TerminalMenu(opts, title="Choose a file to encrypt")
+    key_selection = key_menu.show()
+    return key_selection
+
+
+# encryption + contact display/selection
+def show_available_contacts(opts: list):
+    key_menu = TerminalMenu(opts, title="select the contact")
+    key_selection = key_menu.show()
+    return key_selection
+
+
+def show_available_trust_level():
+    opts = ["full", "never", "expired"]
+    key_menu = TerminalMenu(opts, title="Enter a trust level for the imported key")
+    key_selection = key_menu.show()
+    return key_selection
+
+
+def show_contact_fields():
+    opts = [
+        "contact name",
+        "contact email",
+        "public key fingerprint",
+    ]
+    selected_opts = select_multiple(opts, tick_character="*", minimal_count=1)
+    return selected_opts
+
+def show_avail_passwords(opts: list):
+    psw_menu = TerminalMenu(opts,title="select a password id")
+    psw_selection = psw_menu.show()
+    return psw_selection
