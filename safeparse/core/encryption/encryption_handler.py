@@ -8,7 +8,7 @@ from safeparse.utils.menu_utils import (
 )
 from rich import print
 from pathlib import Path
-
+from beaupy import confirm
 
 def convert_list(items: list[list[str]]) -> list:
     search_list = []
@@ -81,6 +81,13 @@ def encryption_handler(opt_number: int, enc: EncryptionManager):
             )
 
         print(f"decryption status: {result.status}")
+
+        print("")
+        if confirm("Would you like to delete the source file..."):
+            try:
+                full_path.unlink()
+            except FileNotFoundError:
+                print("[bold red] file to does not exists [/bold red]")
         if not result.ok:
             print(f"decryption error: {result.stderr}")
 
