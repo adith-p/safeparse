@@ -24,6 +24,7 @@ from safeparse.core.encryption.encryption_handler import (
 from getpass import getpass
 from safeparse.logging.logger import logger
 
+
 def key_extractor(key: list[dict]):
     key_id_list = []
     for items in key:
@@ -49,7 +50,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         real_name = prompt("name> ")
         name_comment = prompt("name comment> ")
         email = prompt("email> ")
-        passphrase =getpass("password> ")
+        passphrase = getpass("password> ")
         gpg_user_id = f"{real_name} <{email}>"
 
         enc.custom_create_keys(
@@ -70,7 +71,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             user_email = uid[0].split()[-1]
             key_to_get = key[key_selection]["keyid"]
             public_key_path = str(enc.export_folder)
-            with open(public_key_path + f"/{user_email}-public_key.enc", "w") as file:
+            with open(public_key_path + f"/{user_email}-public_key.asc", "w") as file:
                 file.write(enc.gpg.export_keys(key_to_get))
             logger.info("public key exported")
         except TypeError:
@@ -85,7 +86,8 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         ]
         key_selection = show_key_menu(public_keys)
         if key_selection != None:
-            public_key_path = str(enc.import_folder) + f"/{public_keys[key_selection]}"
+            public_key_path = str(enc.import_folder) + \
+                f"/{public_keys[key_selection]}"
             public_key = enc.gpg.import_keys_file(public_key_path)
 
             if public_key.fingerprints[0]:
@@ -113,7 +115,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             print(
                 "[green]Please select [bold red]one file[/bold red] to import [/green]"
             )
-    
+
     if opt_number == 4:
         all_keys = enc.get_all_keys()
         if not all_keys:
@@ -127,36 +129,38 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             print("Deletion cancelled.")
             return
         db = UserDbController()
-        user_primary_fingerprint = db.get_key_fingerprint(user_request["user_id"])
+        user_primary_fingerprint = db.get_key_fingerprint(
+            user_request["user_id"])
 
         if selected_key['fingerprint'] == user_primary_fingerprint[0]:
-            print("[bold red]Error:[/bold red] You cannot delete the primary key associated with your account.")
+            print(
+                "[bold red]Error:[/bold red] You cannot delete the primary key associated with your account.")
             return
 
-        password = getpass(f"Enter key password for {selected_key['uids'][0]} to confirm deletion> ").strip()
+        password = getpass(f"Enter key password for {
+                           selected_key['uids'][0]} to confirm deletion> ").strip()
         if not password:
             print("Password cannot be empty. Deletion cancelled.")
             return
 
         master_hash_tuple = db.get_passhash(user_request["user_id"])
         if not master_hash_tuple:
-            print("[bold red]Fatal Error:[/bold red] Could not retrieve user authentication hash from the database.")
+            print(
+                "[bold red]Fatal Error:[/bold red] Could not retrieve user authentication hash from the database.")
             return
 
         if not verify_password(password, master_hash_tuple[0]):
             print("Incorrect password. Deletion cancelled.")
             return
 
-        print(f"Attempting to delete key with fingerprint: {selected_key['fingerprint']}...")
-        deletion_result = enc.delete_key(selected_key["fingerprint"],password)
-
-
+        print(f"Attempting to delete key with fingerprint: {
+              selected_key['fingerprint']}...")
+        deletion_result = enc.delete_key(selected_key["fingerprint"], password)
 
     # TODO: opt_number is revoke this is a placeholder code for temp import
     if opt_number == 5:
         # revoke keys
         enc.revoke_key()
-
 
 
 def update_contact_form(attribute: str) -> str:
@@ -205,7 +209,8 @@ def contacts_handler(opt_number: int):
         search_query = prompt("search> ")
         search_result = ContactDbController().get_contact(search_query)
         if search_result:
-            contact_selection = show_available_contacts(convert_list(search_result))
+            contact_selection = show_available_contacts(
+                convert_list(search_result))
             contact_fields = show_contact_fields()
             search_result = search_result[contact_selection]
             update_field_dict = convert_dict(contact_fields)
@@ -223,7 +228,8 @@ def contacts_handler(opt_number: int):
         search_query = prompt("search> ")
         search_result = ContactDbController().get_contact(search_query)
         if search_result:
-            contact_selection = show_available_contacts(convert_list(search_result))
+            contact_selection = show_available_contacts(
+                convert_list(search_result))
             search_result = search_result[contact_selection]
             ContactDbController().remove_contact(str(search_result[0]))
         else:

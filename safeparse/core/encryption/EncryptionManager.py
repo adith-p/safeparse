@@ -5,8 +5,10 @@ import gnupg
 class EncryptionManager:
     def __init__(self, username: str, email: str) -> None:
         self.config_path: Path = Path("~/.safeparse/gpg").expanduser()
-        self.export_folder: Path = Path("~/.safeparse/gpg/export_keys").expanduser()
-        self.import_folder: Path = Path("~/.safeparse/gpg/import_keys").expanduser()
+        self.export_folder: Path = Path(
+            "~/.safeparse/gpg/export_keys").expanduser()
+        self.import_folder: Path = Path(
+            "~/.safeparse/gpg/import_keys").expanduser()
         self.enc_folder: Path = Path("~/.safeparse/enc_folder").expanduser()
         self.dec_folder: Path = Path("~/.safeparse/dec_folder").expanduser()
         self.username: str = username
@@ -60,14 +62,14 @@ class EncryptionManager:
         )
         self.gpg.gen_key(key_input)
 
-
-    def delete_key(self, fingerprint,password):
-        status = self.gpg.delete_keys(fingerprint,secret=True,passphrase=password)
+    def delete_key(self, fingerprint, password):
+        status = self.gpg.delete_keys(
+            fingerprint, secret=True, passphrase=password)
         status = self.gpg.delete_keys(fingerprint)
         print(status)
 
-    def encrypt_password(self, fingerprint,password):
-        encrypted_password = self.gpg.encrypt(password,recipients=fingerprint)
+    def encrypt_password(self, fingerprint, password):
+        encrypted_password = self.gpg.encrypt(password, recipients=fingerprint)
         return encrypted_password
 
     def decrypt_password(self, encrypted_password):
