@@ -103,15 +103,18 @@ def dispatch(raw_string):
                 psw_list = menu_list(saved_passwords)
                 # if (selected_password := show_avail_passwords(psw_list)) is None:
                 #   return 0
-                selected_password = show_avail_passwords(psw_list)
-                password_entry = saved_passwords[selected_password]
-                result = vault.view_psw(password_entry)
-                mutable_password_entry = list(password_entry)
-                mutable_password_entry[2] = str(result)
-                display_tables([mutable_password_entry])
-                logger.info(
-                    "User (id: %s) is viewed passwords from the vault.", current_user_id
-                )
+                try:
+                    selected_password = show_avail_passwords(psw_list)
+                    password_entry = saved_passwords[selected_password]
+                    result = vault.view_psw(password_entry)
+                    mutable_password_entry = list(password_entry)
+                    mutable_password_entry[2] = str(result)
+                    display_tables([mutable_password_entry])
+                    logger.info(
+                        "User (id: %s) is viewed passwords from the vault.", current_user_id
+                    )
+                except TypeError:
+                    return
 
             # Save passwords
             if storage_action == 1:
