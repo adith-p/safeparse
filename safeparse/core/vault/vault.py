@@ -6,10 +6,12 @@ from safeparse.core.users.user_auth import password_hash
 from safeparse.core.encryption.EncryptionManager import EncryptionManager
 from safeparse.core.users.user_auth import user_request
 
+
 def view_psw(password_entry: list):
-    enc = EncryptionManager(user_request["username"],user_request["email"])
+
+    enc = EncryptionManager(user_request["username"], user_request["email"],)
     enc.init_encryption()
-    
+
     ciper_text = password_entry[2]
     if not ciper_text:
         print("password not found")
@@ -19,6 +21,7 @@ def view_psw(password_entry: list):
 
         return result
     print(result.stderr)
+
 
 def get_psw(current_usr_id: str) -> list:
     psw_tuple = view_psw_form()
@@ -30,7 +33,7 @@ def get_psw(current_usr_id: str) -> list:
 
 
 def put_paw(current_usr_id: str) -> list | None:
-    enc = EncryptionManager(user_request["username"],user_request["email"])
+    enc = EncryptionManager(user_request["username"], user_request["email"])
     enc.init_encryption()
     psw_tuple = get_psw_form()
 
@@ -40,8 +43,9 @@ def put_paw(current_usr_id: str) -> list | None:
     password = psw_tuple[0]
     notes = psw_tuple[2]
 
-    user_fingerprint = UserDbController().get_key_fingerprint(user_request["user_id"])
-    enc_result = enc.encrypt_password(user_fingerprint,password)
+    user_fingerprint = UserDbController(
+    ).get_key_fingerprint(user_request["user_id"])
+    enc_result = enc.encrypt_password(user_fingerprint, password)
     if enc_result.ok:
         return PasswordDbController().set_password(
             current_user_id=current_usr_id,
@@ -52,7 +56,6 @@ def put_paw(current_usr_id: str) -> list | None:
     print(f"[bold red]ERROR: [/bold red][bold green] {enc_result.stderr}")
 
 
-
 def delete_paw(pass_id):
 
     PasswordDbController().delete_password(pass_id)
@@ -61,7 +64,6 @@ def delete_paw(pass_id):
 
 def update_password(password_id: str, custom_fields: list[int]):
     field_list = {}
-    print(custom_fields)
     for field in custom_fields:
         field_list[field] = update_psw_form(field)
 

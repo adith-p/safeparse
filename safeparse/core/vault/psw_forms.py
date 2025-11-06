@@ -7,9 +7,11 @@ def get_psw_form() -> tuple[str, str, str] | None:
     password = session.prompt("password > ").strip()
     username = session.prompt("username > ").strip()
     note = session.prompt("Note > ").strip()
-    if note == "" or username == "" or password == "":
-        print("[bold green]username, password or note can't be empty[/bold green]")
+    if note == "" and username == "":
+        print("[bold green]username, note can't be empty[/bold green]")
         return None
+    if password == "":
+        print("[bold green] Password can't be empty[/bold green]")
     return (
         password,
         username,

@@ -33,7 +33,7 @@ def main():
     logger.info("Application started")
     session = PromptSession()
 
-    INACTIVITY_TIME = 10
+    INACTIVITY_TIME = 300
     last_time_out = time.time()
     while True:
         try:

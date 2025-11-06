@@ -221,7 +221,8 @@ def show_available_contacts(opts: list):
 
 def show_available_trust_level():
     opts = ["full", "never", "expired"]
-    key_menu = TerminalMenu(opts, title="Enter a trust level for the imported key")
+    key_menu = TerminalMenu(
+        opts, title="Enter a trust level for the imported key")
     key_selection = key_menu.show()
     return key_selection
 
@@ -235,7 +236,8 @@ def show_contact_fields():
     selected_opts = select_multiple(opts, tick_character="*", minimal_count=1)
     return selected_opts
 
+
 def show_avail_passwords(opts: list):
-    psw_menu = TerminalMenu(opts,title="select a password id")
+    psw_menu = TerminalMenu(opts, title="select a password id")
     psw_selection = psw_menu.show()
     return psw_selection

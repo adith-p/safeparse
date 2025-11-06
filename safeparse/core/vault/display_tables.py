@@ -21,6 +21,7 @@ def display_tables(values):
 
     print(table)
 
+
 def cipher_display_tables(values):
     table = Table()
     cols = [

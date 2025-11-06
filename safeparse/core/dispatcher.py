@@ -27,7 +27,7 @@ from safeparse.core.users.user import user_command
 from beaupy import ValidationError
 
 from safeparse.core.vault import vault
-from safeparse.core.vault.display_tables import display_tables,cipher_display_tables
+from safeparse.core.vault.display_tables import display_tables, cipher_display_tables
 
 from safeparse.logging.logger import logger, print_log
 
@@ -37,6 +37,7 @@ def menu_list(items):
     for item in items:
         menu_entry.append(f"{item[0]} {item[1]}")
     return menu_entry
+
 
 def dispatch(raw_string):
     session = PromptSession()
@@ -51,7 +52,8 @@ def dispatch(raw_string):
     command = parser.command
     if command != "auth" and not is_authenticated():
 
-        logger.warning("Blocked unauthenticated attempt to run command: '%s'", command)
+        logger.warning(
+            "Blocked unauthenticated attempt to run command: '%s'", command)
         print("[red] You must be authenticated to run this command. [/red]")
 
         return None
@@ -79,7 +81,8 @@ def dispatch(raw_string):
             elif pass_type == 1:
                 try:
                     custom_options, pass_len = get_password_config()
-                    print(gen_password(length=pass_len, custom_list=custom_options))
+                    print(gen_password(length=pass_len,
+                          custom_list=custom_options))
                     logger.info("password generated.")
                 except ValidationError:
                     logger.warning(
@@ -98,12 +101,13 @@ def dispatch(raw_string):
                 cipher_display_tables(saved_passwords)
 
                 psw_list = menu_list(saved_passwords)
+                # if (selected_password := show_avail_passwords(psw_list)) is None:
+                #   return 0
                 selected_password = show_avail_passwords(psw_list)
                 password_entry = saved_passwords[selected_password]
                 result = vault.view_psw(password_entry)
                 mutable_password_entry = list(password_entry)
-                mutable_password_entry[2] = str(result) 
-                print(mutable_password_entry)
+                mutable_password_entry[2] = str(result)
                 display_tables([mutable_password_entry])
                 logger.info(
                     "User (id: %s) is viewed passwords from the vault.", current_user_id

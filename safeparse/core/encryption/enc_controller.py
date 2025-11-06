@@ -73,7 +73,7 @@ def key_management_handler(opt_number, enc: EncryptionManager):
             public_key_path = str(enc.export_folder)
             with open(public_key_path + f"/{user_email}-public_key.asc", "w") as file:
                 file.write(enc.gpg.export_keys(key_to_get))
-            logger.info("public key exported")
+            logger.info(f"public key{uid} exported")
         except TypeError:
             print("[red] select an option [/red]")
 
@@ -124,10 +124,19 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         key_info_for_menu = key_extractor(all_keys)
         key_selection = show_key_menu(key_info_for_menu)
         selected_key = all_keys[key_selection]
+        key_uid_for_logs = selected_key['uids'][0]
+        key_fingerprint_for_logs = selected_key['fingerprint']
 
-        if not confirm(f"You are about to delete the key for {selected_key['uids'][0]}. Proceed?"):
+        logger.info(f"User initiated deletion for key: {
+                    key_uid_for_logs} ({key_fingerprint_for_logs})")
+
+        if not confirm(f"You are about to delete the key for {key_uid_for_logs}. Proceed?"):
+
             print("Deletion cancelled.")
+            logger.info(f"User cancelled deletion confirmation for key: {
+                key_uid_for_logs}")
             return
+
         db = UserDbController()
         user_primary_fingerprint = db.get_key_fingerprint(
             user_request["user_id"])
@@ -135,6 +144,8 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         if selected_key['fingerprint'] == user_primary_fingerprint[0]:
             print(
                 "[bold red]Error:[/bold red] You cannot delete the primary key associated with your account.")
+            logger.warning(f"User {user_request['username']} attempted to delete their primary account key: {
+                           key_fingerprint_for_logs}")
             return
 
         password = getpass(f"Enter key password for {
@@ -147,6 +158,8 @@ def key_management_handler(opt_number, enc: EncryptionManager):
         if not master_hash_tuple:
             print(
                 "[bold red]Fatal Error:[/bold red] Could not retrieve user authentication hash from the database.")
+            logger.error(
+                "Could not retrive user authentication hash from database")
             return
 
         if not verify_password(password, master_hash_tuple[0]):
@@ -232,6 +245,7 @@ def contacts_handler(opt_number: int):
                 convert_list(search_result))
             search_result = search_result[contact_selection]
             ContactDbController().remove_contact(str(search_result[0]))
+            logger.info("Contact have been removed")
         else:
             print("[bold red] No results found [/bold red]")
 
